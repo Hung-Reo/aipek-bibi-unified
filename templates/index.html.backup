@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BiBi - Trợ lý AI Giáo dục K12</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 60px;
+      color: white;
+    }
+    
+    .header h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .header p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      font-weight: 400;
+    }
+    
+    .chatbot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+    
+    .chatbot-card {
+      background: white;
+      border-radius: 16px;
+      padding: 40px 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .chatbot-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+    
+    .chatbot-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .chatbot-icon {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      display: block;
+    }
+    
+    .chatbot-card h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #2d3748;
+    }
+    
+    .chatbot-card p {
+      color: #718096;
+      line-height: 1.6;
+      margin-bottom: 30px;
+      font-size: 0.95rem;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #4a5568;
+    }
+    
+    .btn-secondary:hover {
+      background: #cbd5e0;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    
+    .btn.disabled {
+      background: #e2e8f0;
+      color: #a0aec0;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn.disabled:hover {
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .status-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    
+    .status-ready {
+      background: #c6f6d5;
+      color: #276749;
+    }
+    
+    .status-coming {
+      background: #fed7d7;
+      color: #c53030;
+    }
+    
+    .footer {
+      text-align: center;
+      color: white;
+      opacity: 0.8;
+      margin-top: 60px;
+    }
+    
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .feature {
+      background: #f7fafc;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #4a5568;
+    }
+    
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 2rem;
+      }
+      
+      .header p {
+        font-size: 1rem;
+      }
+      
+      .chatbot-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      .container {
+        padding: 20px 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎓 BiBi AI Assistant</h1>
+      <p>Hệ thống trợ lý AI cho giáo dục K12 - Powered by OpenAI & RAG</p>
+    </div>
+    
+    <div class="chatbot-grid">
+      <!-- Soạn Giáo Án Bot -->
+      <div class="chatbot-card">
+        <span class="status-badge status-ready">✅ Sẵn sàng</span>
+        <div class="chatbot-icon">📚</div>
+        <h3>Soạn Giáo Án Tiếng Anh</h3>
+        <p>Tạo giáo án chi tiết cho lớp 6 với công nghệ RAG từ SGK, tài liệu CTGD và ngân hàng giáo án mẫu. Hỗ trợ 5 loại giáo án khác nhau.</p>
+        
+        <div class="features">
+          <div class="feature">🎯 Giáo án chính</div>
+          <div class="feature">📖 Giáo án tăng tiết</div>
+          <div class="feature">📚 Bài ôn tập</div>
+          <div class="feature">🎭 Hoạt động ngoại khóa</div>
+          <div class="feature">🧪 Tạo đề kiểm tra</div>
+          <div class="feature">🎵 Âm thanh TTS</div>
+        </div>
+        
+        <div style="margin-top: 25px;">
+          <a href="/bots/bibi_lesson_plan.html" class="btn">Vào Soạn Giáo Án</a>
+        </div>
+      </div>
+      
+      <!-- Grammar Bot -->
+      <div class="chatbot-card">
+        <span class="status-badge status-coming">🚧 Đang phát triển</span>
+        <div class="chatbot-icon">📖</div>
+        <h3>Trợ lý Ngữ Pháp</h3>
+        <p>Chatbot dạy ngữ pháp tiếng Anh tương tác, giải thích chi tiết với ví dụ cụ thể và bài tập thực hành phong phú.</p>
+        
+        <div class="features">
+          <div class="feature">💬 Chat tương tác</div>
+          <div class="feature">📝 Giải thích chi tiết</div>
+          <div class="feature">🎯 Bài tập thực hành</div>
+          <div class="feature">📊 Theo dõi tiến độ</div>
+        </div>
+        
+        <div style="margin-top: 25px;">
+          <button class="btn disabled">Sắp ra mắt</button>
+        </div>
+      </div>
+      
+      <!-- Vocabulary Bot -->
+      <div class="chatbot-card">
+        <span class="status-badge status-coming">🚧 Đang phát triển</span>
+        <div class="chatbot-icon">📝</div>
+        <h3>Trợ lý Từ Vựng</h3>
+        <p>Hệ thống học từ vựng thông minh với flashcard, game tương tác và lặp lại khoảng cách để nhớ lâu.</p>
+        
+        <div class="features">
+          <div class="feature">🃏 Flashcard thông minh</div>
+          <div class="feature">🎮 Game từ vựng</div>
+          <div class="feature">🔄 Lặp lại khoảng cách</div>
+          <div class="feature">📈 Thống kê học tập</div>
+        </div>
+        
+        <div style="margin-top: 25px;">
+          <button class="btn disabled">Sắp ra mắt</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>💡 Được phát triển bởi team AIPEK với công nghệ AI tiên tiến</p>
+      <p style="margin-top: 10px; font-size: 0.9rem;">OpenAI GPT-4 • Pinecone Vector DB • FastAPI • Modern Web Tech</p>
+    </div>
+  </div>
+</body>
+</html>

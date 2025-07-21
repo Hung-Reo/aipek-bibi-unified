@@ -1,0 +1,847 @@
+/* bibi_grammar_modern.css - Cô lập UI hiện đại cho BiBi Grammar */
+
+/* Reset cho container chính */
+.bibi-grammar-app {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: #f9f9f9 !important;
+  color: #333 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+/* Reset body khi ở chế độ modern UI */
+body.modern-ui {
+  display: block !important;
+  justify-content: normal !important;
+  align-items: normal !important;
+}
+
+/* Header thông minh */
+.bibi-grammar-app .smart-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 12px 20px !important;
+  background-color: #f8f9fa !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  width: 100% !important;
+}
+
+/* Phần trái của header */
+.bibi-grammar-app .header-left {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.bibi-grammar-app .home-btn {
+  display: flex !important;
+  align-items: center !important;
+  text-decoration: none !important;
+  color: #333 !important;
+  margin-right: 15px !important;
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  transition: background-color 0.3s !important;
+}
+
+.bibi-grammar-app .home-btn:hover {
+  background-color: #e9ecef !important;
+}
+
+.bibi-grammar-app .home-btn i {
+  margin-right: 6px !important;
+}
+
+.bibi-grammar-app .logo {
+  font-weight: bold !important;
+  font-size: 1.2rem !important;
+}
+
+/* Phần giữa của header */
+.bibi-grammar-app .header-center {
+  flex-grow: 1 !important;
+  max-width: 500px !important;
+  margin: 0 20px !important;
+}
+
+.bibi-grammar-app .search-container {
+  position: relative !important;
+  width: 100% !important;
+}
+
+.bibi-grammar-app .search-icon {
+  position: absolute !important;
+  left: 10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: #6c757d !important;
+}
+
+.bibi-grammar-app #topic-search {
+  width: 100% !important;
+  padding: 8px 10px 8px 35px !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 20px !important;
+  font-size: 14px !important;
+  background-color: #fff !important;
+  color: #333 !important;
+}
+
+/* Phần phải của header */
+.bibi-grammar-app .header-right {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.bibi-grammar-app .language-selector {
+  display: flex !important;
+  margin-right: 15px !important;
+}
+
+.bibi-grammar-app .lang-btn {
+  background: none !important;
+  border: none !important;
+  padding: 6px 8px !important;
+  cursor: pointer !important;
+  border-radius: 4px !important;
+  transition: background-color 0.3s !important;
+  margin: 0 2px !important;
+}
+
+.bibi-grammar-app .lang-btn.active {
+  background-color: #e9ecef !important;
+}
+
+/* Điều hướng tab */
+.bibi-grammar-app .tabs-navigation {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+  position: sticky !important;
+  top: 60px !important;
+  z-index: 99 !important;
+  display: block !important;
+}
+
+.bibi-grammar-app .tabs-container {
+  display: flex !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+}
+
+.bibi-grammar-app .tab-btn {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  padding: 12px 16px !important;
+  min-width: 100px !important;
+  border: none !important;
+  background: none !important;
+  color: #6c757d !important;
+  cursor: pointer !important;
+  transition: 0.3s !important;
+  position: relative !important;
+}
+
+.bibi-grammar-app .tab-btn i {
+  font-size: 1.2rem !important;
+  margin-bottom: 5px !important;
+}
+
+.bibi-grammar-app .tab-btn span {
+  font-size: 0.9rem !important;
+}
+
+.bibi-grammar-app .tab-btn.active {
+  color: #007bff !important;
+}
+
+.bibi-grammar-app .tab-btn.active::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 3px !important;
+  background-color: #007bff !important;
+}
+
+/* Container chính */
+.bibi-grammar-app .grammar-container {
+  display: flex !important;
+  margin: 20px auto !important;
+  min-height: 500px !important;
+  max-width: 1200px !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .bibi-grammar-app .grammar-container {
+    flex-direction: column !important;
+  }
+  
+  .bibi-grammar-app .grammar-sidebar {
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid #e1e4e8 !important;
+  }
+  
+  .bibi-grammar-app .header-center {
+    display: none !important;
+  }
+}
+
+/* UI Mode Switcher */
+.bibi-grammar-app .ui-mode-switch {
+  display: flex !important;
+  align-items: center !important;
+  margin-right: 10px !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  background-color: #f0f0f0 !important;
+  color: #333 !important;
+  transition: all 0.3s !important;
+}
+
+.bibi-grammar-app .ui-mode-switch:hover {
+  background-color: #e3e3e3 !important;
+}
+
+/* Dark Theme - Cô lập với namespace */
+body.dark-theme .bibi-grammar-app {
+  background-color: #1a1a1a !important;
+  color: #f0f0f0 !important;
+}
+
+body.dark-theme .bibi-grammar-app .smart-header {
+  background-color: #2d2d2d !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-theme .bibi-grammar-app .home-btn {
+  color: #f0f0f0 !important;
+}
+
+body.dark-theme .bibi-grammar-app .home-btn:hover {
+  background-color: #3d3d3d !important;
+}
+
+body.dark-theme .bibi-grammar-app #topic-search {
+  background-color: #3d3d3d !important;
+  color: #f0f0f0 !important;
+  border: 1px solid #555 !important;
+}
+/* Classic UI Mode styles */
+.bibi-grammar-app.classic-ui {
+  /* Thiết lập để hoạt động với style.css hiện tại */
+  max-width: 800px !important;
+  margin: 0 auto !important;
+}
+
+.bibi-grammar-app.classic-ui .smart-header {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: none !important;
+  position: static !important;
+}
+
+.bibi-grammar-app.classic-ui .tabs-navigation {
+  position: static !important;
+  background-color: #fdfdfd !important;
+  border-bottom: 2px solid #ccc !important;
+}
+
+.bibi-grammar-app.classic-ui .grammar-container {
+  box-shadow: none !important;
+  border: 1px solid #e0e0e0 !important;
+}
+
+/* Thêm vào cuối file CSS-RAG */
+.rag-status {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #f2f2f2;
+  transition: all 0.3s ease;
+}
+
+.rag-status i {
+  margin-right: 5px;
+  font-size: 1rem;
+}
+
+.rag-status.active {
+  color: white;
+  background-color: #4CAF50;
+}
+
+.rag-status.inactive {
+  color: white;
+  background-color: #F44336;
+}
+
+/* Dark theme support */
+.dark-theme .rag-status {
+  background-color: #444;
+  color: #ddd;
+}
+
+/* Ẩn các nút trùng lặp trong sidebar */
+.bibi-grammar-app .action-buttons {
+  display: none !important;
+}
+
+/* Tăng khoảng cách cho nút giải thích chính */
+.bibi-grammar-app .primary-btn {
+  margin-bottom: 30px !important;
+}
+
+/* Thêm badge cho nội dung được hỗ trợ bởi RAG */
+.rag-badge {
+  display: inline-block;
+  background-color: #4CAF50;
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.dark-theme .rag-badge.rag-success {
+  background-color: #2E7D32;
+}
+
+.dark-theme .rag-badge.rag-fallback {
+  background-color: #E65100;
+}
+
+.dark-theme .rag-badge.rag-mixed {
+  background-color: #7B1FA2;
+}
+
+.dark-theme .rag-badge.rag-disabled {
+  background-color: #616161;
+}
+
+.dark-theme .content-rag {
+  border-left-color: #2E7D32;
+  background-color: rgba(46, 125, 50, 0.08);
+}
+
+.dark-theme .content-ai {
+  border-left-color: #E65100;
+  background-color: rgba(230, 81, 0, 0.08);
+}
+
+.dark-theme .content-mixed {
+  border-left-color: #7B1FA2;
+  background-color: rgba(123, 31, 162, 0.08);
+}
+
+/* Định dạng cho phần nguồn RAG */
+.rag-sources {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px dashed #ddd;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.rag-sources h4 {
+  font-size: 0.95rem;
+  margin-bottom: 5px;
+}
+
+.rag-source-item {
+  margin-bottom: 5px;
+  padding-left: 10px;
+  border-left: 2px solid #4CAF50;
+}
+
+.dark-theme .rag-sources {
+  border-top-color: #555;
+  color: #aaa;
+}
+
+.dark-theme .rag-source-item {
+  border-left-color: #2E7D32;
+}
+
+/* Styling cho phần chat bổ sung */
+.follow-up-container {
+  margin-top: 30px;
+  border-top: 1px solid #ddd;
+  padding-top: 20px;
+}
+
+.follow-up-container h4 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.chat-messages {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 15px;
+}
+
+.chat-message {
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 80%;
+}
+
+.user-message {
+  background-color: #e3f2fd;
+  margin-left: auto;
+  border-bottom-right-radius: 0;
+}
+
+.assistant-message {
+  background-color: #f1f1f1;
+  margin-right: auto;
+  border-bottom-left-radius: 0;
+}
+
+.chat-input-container {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  margin-right: 10px;
+}
+
+.chat-send-btn {
+  background-color: #4a6fa5;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+}
+
+.chat-counter {
+  font-size: 0.8rem;
+  color: #666;
+  text-align: right;
+}
+
+/* Dark theme support */
+.dark-theme .follow-up-container {
+  border-top-color: #444;
+}
+
+.dark-theme .follow-up-container h4 {
+  color: #ddd;
+}
+
+.dark-theme .chat-input {
+  background-color: #333;
+  color: #fff;
+  border-color: #555;
+}
+
+.dark-theme .user-message {
+  background-color: #1a3d5a;
+  color: #fff;
+}
+
+.dark-theme .assistant-message {
+  background-color: #383838;
+  color: #fff;
+}
+
+/* Badge cho các loại nội dung */
+.rag-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 15px;
+  font-size: 0.75rem;
+  margin-left: 8px;
+  vertical-align: middle;
+  font-weight: bold;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  cursor: help;
+  transition: transform 0.2s ease;
+  position: relative;
+}
+
+.rag-badge:hover {
+  transform: translateY(-1px);
+}
+
+/* Tooltip cho badge */
+.rag-badge:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 200px;
+  padding: 6px 8px;
+  background-color: #333;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: normal;
+  border-radius: 4px;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Badge khi sử dụng RAG thành công */
+.rag-badge.rag-success {
+  background-color: #4CAF50;
+  color: white;
+}
+
+/* Badge khi dùng AI do RAG thất bại */
+.rag-badge.rag-fallback {
+  background-color: #FF9800;
+  color: white;
+}
+
+/* Badge khi kết hợp RAG và AI */
+.rag-badge.rag-mixed {
+  background-color: #9C27B0;
+  color: white;
+}
+
+/* Badge khi không sử dụng RAG */
+.rag-badge.rag-disabled {
+  background-color: #9E9E9E;
+  color: white;
+}
+
+/* Định dạng phân biệt nội dung */
+.content-rag {
+  border-left: 3px solid #4CAF50;
+  padding-left: 10px;
+  background-color: rgba(76, 175, 80, 0.05);
+  margin-bottom: 10px;
+}
+
+.content-ai {
+  border-left: 3px solid #FF9800;
+  padding-left: 10px;
+  background-color: rgba(255, 152, 0, 0.05);
+  margin-bottom: 10px;
+}
+
+.content-mixed {
+  border-left: 3px solid #9C27B0;
+  padding-left: 10px;
+  background-color: rgba(156, 39, 176, 0.05);
+  margin-bottom: 10px;
+}
+
+/* Icon nhỏ đầu đoạn */
+.content-source-icon {
+  display: inline-block;
+  margin-right: 5px;
+  font-size: 0.9em;
+}
+
+/* Phần tóm tắt nguồn */
+.content-source-summary {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.content-source-summary .progress-bar {
+  height: 8px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  margin: 5px 0;
+  overflow: hidden;
+}
+
+.content-source-summary .progress-fill-rag {
+  height: 100%;
+  background-color: #4CAF50;
+  float: left;
+}
+
+.content-source-summary .progress-fill-ai {
+  height: 100%;
+  background-color: #FF9800;
+  float: left;
+}
+
+/* Tooltips */
+.tooltip {
+  position: relative;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.75rem;
+  font-weight: normal;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Dark theme support */
+.dark-theme .content-source-summary {
+  background-color: #2d2d2d;
+  color: #ccc;
+}
+
+.dark-theme .content-source-summary .progress-bar {
+  background-color: #444;
+}
+
+/* Thông báo khi dùng AI do RAG thất bại */
+.rag-fallback-notice {
+  margin-top: 15px;
+  padding: 10px;
+  border-left: 3px solid #FF9800;
+  background-color: rgba(255, 152, 0, 0.1);
+  color: #5D4037;
+  font-size: 0.9rem;
+}
+
+.rag-fallback-notice i {
+  color: #FF9800;
+  margin-right: 5px;
+}
+
+/* Dark theme support */
+.dark-theme .rag-fallback-notice {
+  background-color: rgba(255, 152, 0, 0.2);
+  color: #FFE0B2;
+}
+
+/* Định dạng nút xuất */
+.export-word-btn, .export-pdf-btn {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 8px;
+  color: #333;
+}
+
+.export-word-btn:hover, .export-pdf-btn:hover {
+  background-color: #e9ecef;
+}
+
+.export-word-btn i, .export-pdf-btn i {
+  margin-right: 6px;
+}
+
+.export-word-btn {
+  color: #2b579a; /* Màu xanh Word */
+}
+
+.export-pdf-btn {
+  color: #f40f02; /* Màu đỏ PDF */
+}
+
+/* Định dạng container chứa các nút */
+.action-buttons-container {
+  display: flex;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+/* Dark theme support */
+.dark-theme .export-word-btn, .dark-theme .export-pdf-btn {
+  background-color: #333;
+  border-color: #555;
+  color: #eee;
+}
+
+.dark-theme .export-word-btn {
+  color: #4d7bd6; /* Màu xanh Word nhạt hơn */
+}
+
+.dark-theme .export-pdf-btn {
+  color: #ff6b6b; /* Màu đỏ PDF nhạt hơn */
+}
+
+.dark-theme .export-word-btn:hover, .dark-theme .export-pdf-btn:hover {
+  background-color: #444;
+}
+
+/* Đánh dấu nội dung từ RAG */
+.rag-highlight {
+  position: relative;
+  padding: 8px 12px;
+  margin: 10px 0;
+  background-color: rgba(76, 175, 80, 0.05);
+  border-left: 3px solid #4CAF50;
+  border-radius: 0 5px 5px 0;
+}
+
+.rag-highlight::before {
+  content: "📚";
+  display: inline-block;
+  margin-right: 6px;
+}
+
+/* Dark theme support */
+.dark-theme .rag-highlight {
+  background-color: rgba(76, 175, 80, 0.1);
+  border-left-color: #2E7D32;
+}
+
+/* Định dạng nhóm nguồn RAG */
+.source-groups {
+  margin-top: 10px;
+}
+
+.source-group {
+  margin-bottom: 15px;
+}
+
+.source-group-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.source-group-icon {
+  margin-right: 6px;
+  font-size: 1.1em;
+}
+
+.source-group-items {
+  margin-left: 20px;
+}
+
+.source-item {
+  padding: 4px 0;
+  font-size: 0.85rem;
+  color: #555;
+  border-left: 2px solid #4CAF50;
+  padding-left: 10px;
+  margin-bottom: 4px;
+}
+
+/* Cải thiện hiển thị đánh dấu nội dung RAG */
+.rag-highlight {
+  position: relative;
+  background-color: rgba(76, 175, 80, 0.06);
+  border-left: 3px solid #4CAF50;
+  padding: 8px 12px 8px 30px;
+  margin: 10px 0;
+  border-radius: 0 5px 5px 0;
+}
+
+.rag-highlight::before {
+  content: "📚";
+  position: absolute;
+  left: 8px;
+  top: 8px;
+}
+
+/* Hiển thị tóm tắt nguồn */
+.content-source-summary {
+  margin-top: 25px;
+  padding: 12px 15px;
+  background-color: #f5f9f5;
+  border-radius: 6px;
+  border-left: 4px solid #4CAF50;
+}
+
+.content-source-summary ul {
+  margin: 8px 0 0 0;
+  padding-left: 10px;
+  list-style-type: none;
+}
+
+.content-source-summary li {
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+}
+
+.content-source-summary .content-source-icon {
+  margin-right: 6px;
+  display: inline-block;
+}
+
+/* Dark theme support */
+.dark-theme .content-source-summary {
+  background-color: #2d2d2d;
+  color: #ccc;
+  border-left-color: #2E7D32;
+}
+
+.dark-theme .source-group-title {
+  color: #ddd;
+}
+
+.dark-theme .source-item {
+  color: #bbb;
+  border-left-color: #2E7D32;
+}
+
+.dark-theme .rag-highlight {
+  background-color: rgba(46, 125, 50, 0.1);
+  border-left-color: #2E7D32;
+}
+
+.grammar-card-actions {
+  display: none !important; /* Ẩn container cũ */
+}
+
+.grammar-card-actions .chat-btn {
+  display: none !important;
+}

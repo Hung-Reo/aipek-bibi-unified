@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <script>
+    // Thiết lập chế độ giao diện ngay khi tải trang
+    (function() {
+      const savedUIMode = localStorage.getItem('bibi-ui-mode') || 'modern';
+      if (savedUIMode === 'modern') {
+        document.documentElement.classList.add('modern-ui');
+      }
+    })();
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BiBi Soạn Giáo Án</title>
+  <!-- ✅ FIXED: Use /static paths for unified deployment -->
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/bibi_grammar_modern.css" />
+  <link rel="stylesheet" href="/static/css/lesson-plan.css" />
+
+  <!-- ✅ THÊM CSS STYLES MỚI VÀO TRONG <head> SECTION để mờ các tab chưa xong -->
+  <style>
+    /* CSS để disable tabs và hiện tooltip */
+    .tab-btn.coming-soon {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+        position: relative;
+        transition: opacity 0.3s ease;
+    }
+
+    .tab-btn.coming-soon::after {
+        content: "🚧 Đang phát triển";
+        position: absolute;
+        bottom: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        white-space: nowrap;
+        z-index: 1000;
+        pointer-events: none;
+    }
+
+    .tab-btn.coming-soon:hover::after {
+        opacity: 1;
+    }
+
+    /* Dark theme support */
+    .dark-theme .tab-btn.coming-soon::after {
+        background: #555;
+        color: #fff;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <!-- ✅ FIXED: Use /static paths -->
+  <script src="/static/libs/docx.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <!-- ✅ FIXED: Use /static paths -->
+  <link rel="stylesheet" href="/static/css/print.css" media="print" />
+  <!-- ✅ FIXED: Use /static paths -->
+  <script type="module" src="/static/js/controllers/feedback.js"></script>
+</head>
+<body>
+  <!-- Container cô lập cho UI hiện đại -->
+  <div class="bibi-lesson-plan-app" id="bibi-lesson-plan-app">
+    <!-- Header mới -->
+    <header class="smart-header">
+      <div class="header-left">
+        <a href="/index.html" class="home-btn">
+          <i class="fas fa-home"></i>
+          <!-- ✅ FIXED: Use /static paths -->
+          <img src="/static/images/petrusky-logo.png" alt="Pétrus Ký" class="school-logo">
+        </a>
+        <div class="logo-separator"></div>
+        <div class="logo">🤖 BiBi</div>
+      </div>
+      
+      <div class="header-center">
+        <div class="search-container">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" id="topic-search" placeholder="Tìm kiếm tiêu đề giáo án...">
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <!-- Chỉ báo RAG -->
+        <div id="rag-indicator" class="rag-status" title="Trạng thái kết nối với cơ sở dữ liệu">
+          <i class="fas fa-database"></i>
+          <span class="rag-status-text">RAG: Đang kiểm tra...</span>
+        </div>
+        <!-- Nút chuyển đổi giao diện mới -->
+        <button id="ui-mode-toggle" class="ui-mode-switch">
+          <i class="fas fa-sync-alt"></i>
+          <span>Giao diện</span>
+        </button>
+        <div class="language-selector">
+          <button id="lang-vi" class="lang-btn active">🇻🇳</button>
+          <button id="lang-en" class="lang-btn">🇬🇧</button>
+          <button id="lang-both" class="lang-btn">🇻🇳🇬🇧</button>
+        </div>
+        <button id="theme-toggle" class="theme-btn">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </header>
+
+  <!-- Navigation tabs dưới header -->
+  <nav class="tabs-navigation">
+    <div class="tabs-container">
+      <button id="main-tab" class="tab-btn active">
+          <i class="fas fa-book"></i>
+          <span>Giáo án chính</span>
+      </button>
+      <button id="supplementary-tab" class="tab-btn">
+          <i class="fas fa-list"></i>
+          <span>Giáo án tăng tiết</span>
+      </button>
+      <button id="review-tab" class="tab-btn">
+        <i class="fas fa-redo"></i>
+        <span>Bài Review</span>
+      </button>
+      
+      <button id="test-tab" class="tab-btn">
+        <i class="fas fa-clipboard-check"></i>
+        <span>Kiểm tra</span>
+      </button>
+      
+      <button id="extracurricular-tab" class="tab-btn">
+        <i class="fas fa-tasks"></i>
+        <span>Hoạt động ngoại khóa</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Container chính -->
+  <div class="lesson-plan-container">
+    <!-- Sidebar bên trái cho Main, Supplementary, etc. -->
+    <div class="lesson-plan-sidebar" id="main-sidebar">
+      <h3>Soạn giáo án tiếng Anh</h3>
+      
+      <div class="lesson-plan-form">
+        <!-- Nút tạo giáo án ở đầu form -->
+        <button id="generate-lesson-plan-btn-top" class="action-btn primary-btn sticky-btn">
+          <i class="fas fa-magic"></i> Tạo giáo án
+        </button>
+        <!-- Thêm nút kết hợp (mặc định ẩn) -->
+        <button id="combine-lessons-btn" class="action-btn combine-btn" style="display: none;">
+          <i class="fas fa-object-group"></i> Kết hợp các tiết đã tạo
+        </button>
+        
+        <!-- Form động sẽ được thay đổi dựa vào loại giáo án -->
+        <div id="lesson-plan-form-container">
+          <!-- PHASE 2: Wrap wizard trong container có class để control visibility -->
+          <div id="main-form-content" class="main-sidebar-content">
+            <!-- Form Wizard sẽ thay thế form mặc định này -->
+            <div id="lesson-plan-wizard" class="form-wizard">
+            <!-- Tab Navigator -->
+            <div class="wizard-steps">
+              <div class="wizard-step active" data-step="1">
+                <span class="step-number">1</span>
+                <span class="step-text">Thông tin cơ bản</span>
+              </div>
+              <div class="wizard-step" data-step="2">
+                <span class="step-number">2</span>
+                <span class="step-text">Chọn nội dung</span>
+              </div>
+              <div class="wizard-step" data-step="3">
+                <span class="step-number">3</span>
+                <span class="step-text">Chi tiết bài học</span>
+              </div>
+              <div class="wizard-step" data-step="4">
+                <span class="step-number">4</span>
+                <span class="step-text">Thời gian</span>
+              </div>
+              <div class="wizard-step" data-step="5">
+                <span class="step-number">5</span>
+                <span class="step-text">Thông tin bổ sung</span>
+              </div>
+            </div>
+            
+            <!-- Step Contents -->
+            <div class="wizard-content">
+              <!-- Step 1: Thông tin cơ bản -->
+              <div class="wizard-pane active" data-step="1">
+                <div class="form-panel">
+                  <div class="form-group">
+                    <label for="grade-select">Lớp:</label>
+                    <select id="grade-select" class="full-width">
+                      <option value="6">Lớp 6</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="semester-select">Học kỳ:</label>
+                    <select id="semester-select" class="full-width">
+                      <option value="1">Học kỳ 1</option>
+                      <option value="2">Học kỳ 2</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="unit-select">Chọn Unit:</label>
+                    <select id="unit-select" class="full-width">
+                      <option value="1">Unit 1</option>
+                      <option value="2">Unit 2</option>
+                      <option value="3">Unit 3</option>
+                      <option value="4">Unit 4</option>
+                      <option value="5">Unit 5</option>
+                      <option value="6">Unit 6</option>
+                      <option value="7">Unit 7</option>
+                      <option value="8">Unit 8</option>
+                      <option value="9">Unit 9</option>
+                      <option value="10">Unit 10</option>
+                      <option value="11">Unit 11</option>
+                      <option value="12">Unit 12</option>
+                    </select>
+                </div>
+                </div>
+                
+                <div class="wizard-actions">
+                  <button class="wizard-next-btn">Tiếp theo <i class="fas fa-arrow-right"></i></button>
+                </div>
+              </div>
+              
+              <!-- Step 2: Chọn nội dung -->
+              <div class="wizard-pane" data-step="2">
+                <!-- Phần Unit - sẽ hiển thị khi chọn "Bài học chính" -->
+                <div class="form-panel unit-panel">
+                  <div class="form-group">
+                    <label for="unit-select">Unit:</label>
+                    <select id="unit-select" class="full-width">
+                      <!-- Options will be populated dynamically -->
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="lesson-select">Bài học:</label>
+                    <select id="lesson-select" class="full-width">
+                      <!-- Options will be populated dynamically -->
+                    </select>
+                  </div>
+                </div>
+                
+                <!-- Phần Tăng tiết - sẽ hiển thị khi chọn "Bài tăng tiết" -->
+                <div class="form-panel supplementary-panel" style="display: none;">
+                  <div class="form-group">
+                    <label for="supp-unit-select">Unit liên quan:</label>
+                    <select id="supp-unit-select" class="full-width">
+                      <!-- Options will be populated dynamically -->
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="supp-type-select">Loại kỹ năng:</label>
+                    <select id="supp-type-select" class="full-width">
+                      <option value="vocabulary">Từ vựng (Vocabulary)</option>
+                      <option value="grammar">Ngữ pháp (Grammar)</option>
+                      <option value="pronunciation">Phát âm (Pronunciation)</option>
+                      <option value="reading">Đọc hiểu (Reading)</option>
+                      <option value="listening">Nghe (Listening)</option>
+                      <option value="speaking">Nói (Speaking)</option>
+                      <option value="writing">Viết (Writing)</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="wizard-actions">
+                  <button class="wizard-prev-btn"><i class="fas fa-arrow-left"></i> Quay lại</button>
+                  <button class="wizard-next-btn">Tiếp theo <i class="fas fa-arrow-right"></i></button>
+                </div>
+              </div>
+              
+              <!-- Step 3: Chi tiết bài học -->
+              <div class="wizard-pane" data-step="3">
+                <div class="form-panel">
+                  <div class="lesson-info-preview">
+                    <div id="lesson-focus-display" class="info-preview-item">
+                      <span class="info-label">Trọng tâm:</span>
+                      <span class="info-value">Vocabulary & Pronunciation</span>
+                    </div>
+                    <div id="lesson-grammar-display" class="info-preview-item" style="display: none;">
+                      <span class="info-label">Ngữ pháp:</span>
+                      <span class="info-value">Present Simple</span>
+                    </div>
+                    <div id="lesson-pronunciation-display" class="info-preview-item" style="display: none;">
+                      <span class="info-label">Phát âm:</span>
+                      <span class="info-value">/ɑː/, /ʌ/</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Các trường chi tiết khác sẽ hiển thị tùy thuộc vào loại bài học -->
+                  <div id="dynamic-details-fields">
+                    <!-- Fields will be populated dynamically -->
+                  </div>
+                </div>
+                
+                <div class="wizard-actions">
+                  <button class="wizard-prev-btn"><i class="fas fa-arrow-left"></i> Quay lại</button>
+                  <button class="wizard-next-btn">Tiếp theo <i class="fas fa-arrow-right"></i></button>
+                </div>
+              </div>
+              
+              <!-- Step 4: Thời gian -->
+              <div class="wizard-pane" data-step="4">
+                <div class="form-panel">
+                  <div class="form-group">
+                    <label for="week-input">Tuần học:</label>
+                    <input type="text" id="week-input" placeholder="Nhập số tuần (Ví dụ: 01)" class="full-width">
+                  </div>
+                  
+                  <!-- Hiển thị thông tin tuần -->
+                  <div id="week-info-display" class="week-info-box" style="display: none;"></div>
+                  
+                  <!-- Dropdown chọn tiết -->
+                  <div class="form-group lesson-selection" id="lesson-selection-container" style="display: none;">
+                    <label for="lesson-select">Tiết học:</label>
+                    <select id="lesson-select" class="form-control">
+                      <option value="getting-started">Tiết 1: Getting Started</option>
+                      <option value="closer-look-1">Tiết 2: A closer look 1</option>
+                      <option value="closer-look-2">Tiết 3: A closer look 2</option>
+                      <option value="communication">Tiết 4: Communication</option>
+                      <option value="skills-1">Tiết 5: Skills 1</option>
+                      <option value="skills-2">Tiết 6: Skills 2</option>
+                      <option value="looking-back">Tiết 7: Looking back & Project</option>
+                    </select>
+                  </div>
+                  <script>
+                    // Kiểm tra phần tử có tồn tại khi trang load không
+                    document.addEventListener('DOMContentLoaded', function() {
+                      console.log('lesson-selection-container exists:', !!document.getElementById('lesson-selection-container'));
+                    });
+                  </script>
+                  
+                  <div class="form-group">
+                    <label for="additional-instructions">Yêu cầu đặc biệt (nếu có):</label>
+                    <textarea id="additional-instructions" rows="3" placeholder="Nhập yêu cầu đặc biệt nếu có"></textarea>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="preparing-date">Ngày soạn:</label>
+                    <input type="text" id="preparing-date" placeholder="VD: 22/03/2025">
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="teaching-date">Ngày dạy:</label>
+                    <input type="text" id="teaching-date" placeholder="VD: 24/03 - 28/03/2025">
+                  </div>
+                </div>
+                
+                <div class="preview-section">
+                  <h4>Preview</h4>
+                  <div class="preview-box">
+                    <div id="preview-header" class="preview-header">
+                      Week 13th<br>
+                      Preparing day: 22/03/2025<br>
+                      Teaching day: 24/03 - 28/03/2025<br>
+                      <br>
+                      UNIT 10: OUR HOUSES IN THE FUTURE<br>
+                      Lesson 1: Getting started
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="wizard-actions">
+                  <button class="wizard-prev-btn"><i class="fas fa-arrow-left"></i> Quay lại</button>
+                  <button class="wizard-next-btn">Tiếp theo <i class="fas fa-arrow-right"></i></button>
+                </div>
+              </div>
+              
+              <!-- Step 5: Thông tin bổ sung -->
+              <div class="wizard-pane" data-step="5">
+                <div class="form-panel">
+                  <div class="form-group">
+                    <label for="objectives-textarea">Mục tiêu bài học:</label>
+                    <textarea id="objectives-textarea" rows="3" placeholder="Nhập mục tiêu chính của bài học"></textarea>
+                  </div>
+                  
+                </div>
+                
+                <div class="wizard-actions">
+                  <button class="wizard-prev-btn"><i class="fas fa-arrow-left"></i> Quay lại</button>
+                  <button class="wizard-complete-btn primary-btn"><i class="fas fa-magic"></i> Tạo giáo án</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- PHASE 1: Review Form Section - Hidden by default -->
+          <div id="review-form-section" class="review-form-section" style="display: none;">
+            <h3>Soạn bài Review</h3>
+            
+            <div class="lesson-plan-form">
+              <!-- Nút tạo Review ở đầu form -->
+              <button id="generate-review-btn-main" class="action-btn primary-btn sticky-btn">
+                <i class="fas fa-redo"></i> Tạo bài Review
+              </button>
+              
+              <!-- Review Form Content -->
+              <div class="review-form-container">
+                <div class="form-panel">
+                  <div class="form-group">
+                    <label for="grade-select">Lớp:</label>
+                    <select id="grade-select" class="full-width">
+                      <option value="6">Lớp 6</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="review-semester-select-main">Học kỳ:</label>
+                    <select id="review-semester-select-main" class="full-width">
+                      <option value="1">Học kỳ 1</option>
+                      <option value="2">Học kỳ 2</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="review-select-main">Review:</label>
+                    <select id="review-select-main" class="full-width">
+                      <option value="1">Review 1 (Units 1-3)</option>
+                      <option value="2">Review 2 (Units 4-6)</option>
+                      <option value="3">Review 3 (Units 7-9)</option>
+                      <option value="4">Review 4 (Units 10-12)</option>
+                    </select>
+                  </div>
+                  
+                  <!-- Kỹ năng ôn tập -->
+                  <div class="form-group review-skills-container">
+                    <label>Chọn kỹ năng ôn tập (có thể chọn nhiều):</label>
+                    <div class="skills-checkboxes">
+                      <label class="checkbox-container">
+                        <input type="checkbox" name="review-skill-main" value="vocabulary" checked> Vocabulary (Từ vựng)
+                      </label>
+                      <label class="checkbox-container">
+                        <input type="checkbox" name="review-skill-main" value="pronunciation" checked> Pronunciation (Phát âm)
+                      </label>
+                      <label class="checkbox-container">
+                        <input type="checkbox" name="review-skill-main" value="grammar" checked> Grammar (Ngữ pháp)
+                      </label>
+                      <label class="checkbox-container">
+                        <input type="checkbox" name="review-skill-main" value="reading"> Reading (Đọc)
+                      </label>
+                      <label class="checkbox-container">
+                        <input type="checkbox" name="review-skill-main" value="writing"> Writing (Viết)
+                      </label>
+                      <label class="checkbox-container">
+                        <input type="checkbox" name="review-skill-main" value="listening"> Listening (Nghe)
+                      </label>
+                      <label class="checkbox-container">
+                        <input type="checkbox" name="review-skill-main" value="speaking"> Speaking (Nói)
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="review-additional-instructions-main">Yêu cầu đặc biệt (nếu có):</label>
+                    <textarea id="review-additional-instructions-main" rows="3" placeholder="Nhập yêu cầu đặc biệt nếu có"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- Đóng main-form-content wrapper -->
+
+    <!-- PHASE 6: Review Sidebar - Restored for testing -->
+    <div class="lesson-plan-sidebar" id="review-sidebar" style="display: none;">
+      <h3>Soạn bài Review</h3>
+      
+      <div class="lesson-plan-form">
+        <!-- Nút tạo Review ở đầu form -->
+        <button id="generate-review-btn-top" class="action-btn primary-btn sticky-btn">
+          <i class="fas fa-redo"></i> Tạo bài Review
+        </button>
+        
+        <!-- Review Form -->
+        <div id="review-form-container">
+          <div class="form-panel">
+            <div class="form-group">
+              <label for="grade-select">Lớp:</label>
+              <select id="grade-select" class="full-width">
+                <option value="6">Lớp 6</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="review-semester-select">Học kỳ:</label>
+              <select id="review-semester-select" class="full-width">
+                <option value="1">Học kỳ 1</option>
+                <option value="2">Học kỳ 2</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="review-type-select-main">Review:</label>
+              <select id="review-type-select-main" class="full-width">
+                <!-- Options will be populated dynamically -->
+              </select>
+            </div>
+            
+            <!-- Kỹ năng ôn tập -->
+            <div class="form-group review-skills-container" id="review-skills-main-container">
+              <label>Chọn kỹ năng ôn tập (có thể chọn nhiều):</label>
+              <div class="skills-checkboxes" id="review-skills-main-checkboxes">
+                <label class="checkbox-container">
+                  <input type="checkbox" name="review-skill-main" value="vocabulary"> Vocabulary (Từ vựng)
+                </label>
+                <label class="checkbox-container">
+                  <input type="checkbox" name="review-skill-main" value="pronunciation"> Pronunciation (Phát âm)
+                </label>
+                <label class="checkbox-container">
+                  <input type="checkbox" name="review-skill-main" value="grammar"> Grammar (Ngữ pháp)
+                </label>
+                <label class="checkbox-container">
+                  <input type="checkbox" name="review-skill-main" value="reading"> Reading (Đọc)
+                </label>
+                <label class="checkbox-container">
+                  <input type="checkbox" name="review-skill-main" value="writing"> Writing (Viết)
+                </label>
+                <label class="checkbox-container">
+                  <input type="checkbox" name="review-skill-main" value="listening"> Listening (Nghe)
+                </label>
+                <label class="checkbox-container">
+                  <input type="checkbox" name="review-skill-main" value="speaking"> Speaking (Nói)
+                </label>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="review-week-input">Tuần học:</label>
+              <input type="text" id="review-week-input" placeholder="Nhập số tuần (Ví dụ: 01)" class="full-width">
+            </div>
+            
+            <div class="form-group">
+              <label for="review-additional-instructions">Yêu cầu đặc biệt (nếu có):</label>
+              <textarea id="review-additional-instructions" rows="3" placeholder="Nhập yêu cầu đặc biệt nếu có"></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="review-preparing-date">Ngày soạn:</label>
+              <input type="text" id="review-preparing-date" placeholder="VD: 22/03/2025">
+            </div>
+            
+            <div class="form-group">
+              <label for="review-teacher-name">Tên giáo viên:</label>
+              <input type="text" id="review-teacher-name" placeholder="Nhập tên giáo viên">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FIX: Review Form Section để support Review tab -->
+      <div id="review-form-section" class="review-form-section" style="display: none;">
+        <h3>Soạn bài Review</h3>
+        
+        <!-- Nút tạo Review -->
+        <button id="generate-review-btn-main" class="action-btn primary-btn sticky-btn">
+          <i class="fas fa-redo"></i> Tạo bài Review
+        </button>
+        
+        <!-- Form content -->
+        <div class="form-panel">
+          <div class="form-group">
+            <label for="review-select-main">Review:</label>
+            <select id="review-select-main" class="full-width">
+              <option value="1">Review 1 (Units 1-3)</option>
+              <option value="2">Review 2 (Units 4-6)</option>
+              <option value="3">Review 3 (Units 7-9)</option>
+              <option value="4">Review 4 (Units 10-12)</option>
+            </select>
+          </div>
+          
+          <div class="form-group review-skills-container">
+            <label>Chọn kỹ năng ôn tập:</label>
+            <div class="skills-checkboxes">
+              <label class="checkbox-container">
+                <input type="checkbox" name="review-skill-main" value="vocabulary" checked> Vocabulary
+              </label>
+              <label class="checkbox-container">
+                <input type="checkbox" name="review-skill-main" value="grammar" checked> Grammar
+              </label>
+              <label class="checkbox-container">
+                <input type="checkbox" name="review-skill-main" value="pronunciation" checked> Pronunciation
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ FIXED: Khu vực nội dung bên phải - TẤT CẢ OUTPUT DIVS ĐÃ ĐƯỢC THÊM -->
+    <div class="lesson-plan-content">
+      <!-- Tab content: Giáo án chính -->
+      <div id="main-content" class="tab-content active">
+        <div id="main-output" class="output-area">
+          <div class="welcome-message">
+            <h3>Chào mừng đến với trợ lý soạn giáo án!</h3>
+            <p>Chọn một loại giáo án và điền thông tin bên trái để bắt đầu.</p>
+            <p>Công cụ này giúp giáo viên:</p>
+            <ul>
+              <li>Tạo giáo án chi tiết dựa trên sách giáo khoa và chương trình giáo dục chính thức</li>
+              <li>Tiết kiệm thời gian soạn giáo án thông qua AI và cơ sở tri thức</li>
+              <li>Tùy chỉnh giáo án theo nhu cầu cụ thể</li>
+              <li>Xuất và lưu giáo án dễ dàng</li>
+            </ul>
+          </div>
+          <!--Tăng sự thân thiện, sinh động trong phần hiển thị các khối nội dung-->
+          <div class="vocab-block">
+            <h4>📘 Vocabulary Item: Subject</h4>
+            <ul>
+              <li><strong>Form:</strong> subject</li>
+              <li><strong>Meaning:</strong> môn học</li>
+              <li><strong>Pronunciation:</strong> /ˈsʌbdʒɪkt/</li>
+              <li><strong>Example:</strong> English is my favorite subject.</li>
+            </ul>
+          </div>
+          
+          <div class="analysis-block">
+            🧠 <strong>Grammar:</strong> This is + danh từ<br>
+            Ví dụ: This is my school.
+          </div>
+          
+          <div class="example-block">
+            ✍ Example: I go to school every day.
+          </div>
+          
+          <div class="activity-block">
+            🎲 <strong>Game: Bingo Vocabulary</strong>
+            <ul>
+              <li>Phát phiếu từ vựng</li>
+              <li>Nghe – đánh dấu từ</li>
+              <li>Học sinh thắng sẽ dịch + đọc lại từ</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ✅ FIXED: Tab content: Bài Review -->
+      <div id="review-content" class="tab-content">
+        <div id="review-output" class="output-area">
+          <div class="welcome-message tab-welcome-message" id="review-welcome-message">
+            <h3>Chào mừng đến với trợ lý soạn bài Review!</h3>
+            <p>Chọn Review và kỹ năng cần ôn tập bên trái để bắt đầu.</p>
+            <p>Công cụ này giúp giáo viên:</p>
+            <ul>
+              <li>Tạo bài Review tổng hợp kiến thức từ nhiều Unit</li>
+              <li>Lựa chọn kỹ năng cần ôn tập (Vocabulary, Grammar, Reading, Writing...)</li>
+              <li>Thiết kế hoạt động ôn tập phù hợp với trình độ học sinh</li>
+              <li>Xuất và lưu giáo án dễ dàng</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ✅ FIXED: Tab content: Giáo án tăng tiết -->
+      <div id="supplementary-content" class="tab-content">
+        <div id="supplementary-output" class="output-area">
+          <div class="welcome-message tab-welcome-message" id="supplementary-welcome-message">
+            <h3>Chào mừng đến với trợ lý soạn giáo án tăng tiết!</h3>
+            <p>Chọn một loại giáo án và điền thông tin bên trái để bắt đầu.</p>
+            <p>Công cụ này giúp giáo viên:</p>
+            <ul>
+              <li>Tạo bài tập tăng cường cho từng kỹ năng (Vocabulary, Grammar, Pronunciation...)</li>
+              <li>Thiết kế hoạt động phù hợp với tuần học và Unit đã chọn</li>
+              <li>Tùy chỉnh nội dung phù hợp với nhu cầu lớp học</li>
+              <li>Xuất và lưu giáo án dễ dàng</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ✅ FIXED: Tab content: Kiểm tra -->
+      <div id="test-content" class="tab-content">
+        <div id="test-output" class="output-area">
+          <div class="welcome-message tab-welcome-message" id="test-welcome-message">
+            <h3>Chào mừng đến với trợ lý soạn đề kiểm tra!</h3>
+            <p>Chọn thông tin cần thiết bên trái để tạo đề kiểm tra cho học sinh.</p>
+            <p>Công cụ này giúp giáo viên:</p>
+            <ul>
+              <li>Tạo đề kiểm tra phù hợp với Review và kỹ năng cần đánh giá</li>
+              <li>Điều chỉnh độ khó phù hợp với trình độ học sinh</li>
+              <li>Tùy chỉnh nội dung đề kiểm tra theo nhu cầu riêng</li>
+              <li>Xuất và lưu đề kiểm tra để sử dụng</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- ✅ FIXED: Tab content: Hoạt động ngoại khóa -->
+      <div id="extracurricular-content" class="tab-content">
+        <div id="extracurricular-output" class="output-area">
+          <div class="welcome-message tab-welcome-message" id="extracurricular-welcome-message">
+            <h3>Chào mừng đến với trợ lý soạn hoạt động ngoại khóa!</h3>
+            <p>Chọn thông tin cần thiết bên trái để tạo kế hoạch hoạt động ngoại khóa.</p>
+            <p>Công cụ này giúp giáo viên:</p>
+            <ul>
+              <li>Thiết kế hoạt động ngoại khóa phù hợp với chủ đề và cấp độ</li>
+              <li>Tạo kế hoạch chi tiết cho từng hoạt động</li>
+              <li>Tùy chỉnh thời lượng và nội dung phù hợp</li>
+              <li>Xuất và lưu dễ dàng</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tab content: Lịch sử -->
+      <div id="history-content" class="tab-content">
+        <div id="history-output" class="output-area">
+          <div class="history-container">
+            <h3>Lịch sử giáo án</h3>
+            <p>Các giáo án đã tạo gần đây sẽ hiển thị ở đây.</p>
+            <div id="history-list" class="history-list">
+              <!-- Danh sách giáo án sẽ được thêm vào bằng JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="loading-indicator" id="loading-indicator" style="display:none;">
+        <div class="spinner"></div>
+        <p>Đang xử lý...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ FIXED: Import scripts với /static paths cho unified deployment -->
+  <script src="/static/js/controllers/api.js"></script>
+  <script src="/static/js/controllers/ui-mode-manager.js" type="module"></script>
+  <script src="/static/js/controllers/lesson-plan/lesson-plan-main.js" type="module"></script>
+
+  <!-- Thêm script khởi động -->
+  <script type="module">
+    // Khởi động ứng dụng khi trang đã tải
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 BiBi Lesson Plan app initialized');
+      
+      // Kiểm tra trạng thái dark mode
+      if (localStorage.getItem('bibi-theme') === 'dark') {
+        document.body.classList.add('dark-theme');
+      }
+      
+      // Kiểm tra phiên bản cho cập nhật cache
+      const APP_VERSION = '1.0.0';
+      const lastVersion = localStorage.getItem('bibi-lesson-plan-version');
+      
+      if (lastVersion !== APP_VERSION) {
+        // Xóa cache khi cập nhật phiên bản
+        console.log('Phát hiện phiên bản mới, đang xóa cache...');
+        localStorage.setItem('bibi-lesson-plan-version', APP_VERSION);
+        
+        // Import LessonPlanCache và xóa cache
+        import('/static/js/controllers/lesson-plan/lesson-plan-cache.js').then(module => {
+          const LessonPlanCache = module.LessonPlanCache;
+          const cleared = LessonPlanCache.clearAllCache();
+          console.log(`Đã xóa ${cleared} mục cache cũ`);
+        }).catch(err => {
+          console.error('Lỗi khi xóa cache:', err);
+        });
+      }
+    });
+  </script>
+
+  <script>
+  // Script kích hoạt Unit-centric khi trang đã tải
+  document.addEventListener('DOMContentLoaded', function() {
+    // Chờ 500ms để đảm bảo tất cả các thành phần đã tải xong
+    setTimeout(function() {
+      console.log("Kích hoạt tính năng Unit-centric...");
+      
+      // 1. Kiểm tra xem controller đã được khởi tạo chưa
+      if (window.lessonPlanController) {
+        // 2. Nếu đã có uiController và hàm initUnitCentricUI, gọi nó  
+        if (window.lessonPlanController?.uiController?.initUnitCentricUI) {
+          window.lessonPlanController.uiController.initUnitCentricUI();
+          console.log("Đã kích hoạt initUnitCentricUI");
+        }
+
+        // 3. Nếu chưa có, thử các cách khác
+        else {
+          console.warn("Không tìm thấy hàm initUnitCentricUI, thử phương pháp thay thế");
+          
+          // 3a. Thử ẩn trường nhập tuần trực tiếp
+          const weekInputs = document.querySelectorAll('#week-input, input[placeholder*="tuần"]');
+          weekInputs.forEach(input => {
+            if (input && input.parentElement) {
+              input.parentElement.style.display = 'none';
+              console.log("Đã ẩn trường nhập tuần:", input.id || input.name);
+            }
+          });
+          
+          // 3b. Thử hiển thị dropdown Unit trực tiếp
+          const unitSelects = document.querySelectorAll('#unit-select, select[id^="unit"]');
+          unitSelects.forEach(select => {
+            if (select && select.parentElement) {
+              select.parentElement.style.display = 'block';
+              select.parentElement.style.marginTop = '20px';
+              console.log("Đã hiển thị dropdown Unit:", select.id || select.name);
+              
+              // Đặt giá trị mặc định và kích hoạt sự kiện change
+              if (!select.value && select.options.length > 0) {
+                select.value = "1";
+                
+                // Kích hoạt sự kiện change
+                const event = new Event('change');
+                select.dispatchEvent(event);
+                console.log("Đã kích hoạt sự kiện change cho Unit 1");
+              }
+            }
+          });
+        }
+      }
+      // 4. Nếu controller chưa được khởi tạo, đặt lại timeout dài hơn
+      else {
+        console.warn("Chưa tìm thấy lessonPlanController, sẽ thử lại sau 1 giây");
+        setTimeout(function() {
+          if (window.lessonPlanController && typeof window.lessonPlanController.initUnitCentricUI === 'function') {
+            window.lessonPlanController.initUnitCentricUI();
+            console.log("Đã kích hoạt initUnitCentricUI (lần 2)");
+          }
+        }, 1000);
+      }
+      
+      console.log("Hoàn tất kích hoạt Unit-centric");
+    }, 500);
+  });
+  </script>
+
+  <script>
+  // Script khắc phục lỗi xung đột Unit/Review
+    document.addEventListener('DOMContentLoaded', function() {
+    // Chờ 700ms để đảm bảo tất cả các thành phần đã tải xong
+    setTimeout(function() {
+      console.log("Khắc phục lỗi xung đột Unit/Review...");
+      
+      // 1. ĐẢM BẢO CÁC RADIO BUTTONS LUÔN HIỂN THỊ
+      const radioGroup = document.querySelector('.radio-group');
+      if (radioGroup) {
+        radioGroup.style.display = 'block';
+      }
+      
+      // Đảm bảo các label chứa radio buttons hiển thị
+      document.querySelectorAll('input[type="radio"][name="lesson-type"]').forEach(radio => {
+        if (radio && radio.parentElement) {
+          radio.parentElement.style.display = 'block';
+          // Hiển thị thêm phần tử cha của parent để đảm bảo label hiển thị đúng
+          if (radio.parentElement.parentElement) {
+            radio.parentElement.parentElement.style.display = 'block';
+          }
+        }
+      });
+      
+      // 2. Kiểm tra radio nào được chọn và xử lý tương ứng
+      const reviewRadio = document.querySelector('input[type="radio"][value="review"]:checked');
+      const unitRadio = document.querySelector('input[type="radio"][value="unit"]:checked');
+      
+      if (reviewRadio && reviewRadio.checked) {
+        console.log("Phát hiện Review được chọn, đang khắc phục...");
+        
+        // Hiển thị phần Review
+        const reviewSelect = document.querySelector('#review-select');
+        if (reviewSelect && reviewSelect.parentElement) {
+          reviewSelect.parentElement.style.display = 'block';
+        }
+        
+        const reviewSkillsContainer = document.querySelector('#review-skills-container');
+        if (reviewSkillsContainer) {
+          reviewSkillsContainer.style.display = 'block';
+        }
+        
+        // Ẩn dropdown Unit và lesson-select cụ thể
+        const unitSelect = document.querySelector('#unit-select');
+        if (unitSelect && unitSelect.parentElement) {
+          unitSelect.parentElement.style.display = 'none';
+        }
+        
+        const lessonSelect = document.querySelector('#lesson-select');
+        if (lessonSelect && lessonSelect.parentElement) {
+          lessonSelect.parentElement.style.display = 'none';
+        }
+        
+        console.log("Đã khắc phục xung đột Review/Unit - hiển thị Review");
+      } 
+      else if (unitRadio && unitRadio.checked) {
+        console.log("Phát hiện Unit được chọn, đang khắc phục...");
+        
+        // Hiển thị dropdown Unit
+        const unitSelect = document.querySelector('#unit-select');
+        if (unitSelect && unitSelect.parentElement) {
+          unitSelect.parentElement.style.display = 'block';
+        }
+        
+        // Hiển thị dropdown lesson-select
+        const lessonSelect = document.querySelector('#lesson-select');
+        if (lessonSelect && lessonSelect.parentElement) {
+          lessonSelect.parentElement.style.display = 'block';
+        }
+        
+        // Ẩn dropdown Review và kỹ năng
+        const reviewSelect = document.querySelector('#review-select');
+        if (reviewSelect && reviewSelect.parentElement) {
+          reviewSelect.parentElement.style.display = 'none';
+        }
+        
+        const reviewSkillsContainer = document.querySelector('#review-skills-container');
+        if (reviewSkillsContainer) {
+          reviewSkillsContainer.style.display = 'none';
+        }
+        
+        console.log("Đã khắc phục xung đột Review/Unit - hiển thị Unit");
+      }
+      else {
+        // Nếu chưa chọn, hiển thị cả radio buttons
+        console.log("Chưa có loại bài nào được chọn, hiển thị cả hai lựa chọn");
+        
+        // Mặc định chọn Unit
+        if (unitRadio && !unitRadio.checked && !reviewRadio) {
+          unitRadio.checked = true;
+          // Kích hoạt sự kiện change
+          unitRadio.dispatchEvent(new Event('change'));
+        }
+      }
+    }, 700);
+  });
+  </script>
+</body>
+</html>

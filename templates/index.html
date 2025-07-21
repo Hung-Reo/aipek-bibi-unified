@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BiBi - Chọn Trợ Lý AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #f5f5f5;
+      --text-color: #333;
+      --card-bg: white;
+      --card-shadow: rgba(0, 0, 0, 0.1);
+    }
+    body.dark {
+      --bg-color: #2b2b2b;
+      --text-color: #f5f5f5;
+      --card-bg: #383838;
+      --card-shadow: rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+    }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 0;
+      margin: 0;
+      display: flex;
+    }
+    .sidebar {
+      width: 260px;
+      background-color: var(--card-bg);
+      border-right: 1px solid #ddd;
+      padding: 20px;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .sidebar .logo {
+      width: 100%;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .sidebar .logo img {
+      max-width: 100%;
+      height: auto;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .menu-section {
+      margin-bottom: 20px;
+    }
+    .menu-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      margin-left: 10px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+    .menu-item span {
+      margin-left: 8px;
+    }
+    .dropdown {
+      display: none;
+      margin-left: 20px;
+    }
+    .menu-item.open + .dropdown {
+      display: block;
+    }
+    .main-content {
+      flex: 1;
+      padding: 20px;
+    }
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    h1 {
+      flex: 1;
+      text-align: center;
+      text-shadow: 1px 1px 2px #ccc;
+    }
+    .theme-toggle {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .theme-toggle button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .search-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+    .search-box {
+      width: 400px;
+      padding: 10px 14px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      outline: none;
+      font-size: 16px;
+    }
+    .section-title {
+      font-weight: bold;
+      margin: 30px 0 10px;
+      font-size: 20px;
+      text-transform: uppercase;
+    }
+    .bot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .bot-card {
+      background-color: var(--card-bg);
+      border-radius: 20px;
+      box-shadow: 0 8px 20px var(--card-shadow);
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s, opacity 0.5s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .bot-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    .bot-card img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin-bottom: 10px;
+      border: 2px solid #4CAF50;
+      transition: transform 0.3s;
+    }
+    .bot-card:hover img {
+      transform: rotate(10deg) scale(1.05);
+    }
+    .bot-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 17px;
+    }
+    .bot-role {
+      font-size: 14px;
+    }
+    .bot-card.hidden {
+      display: none;
+    }
+    .fade-out {
+      opacity: 0;
+      transition: opacity 0.5s ease-out;
+    }
+    .page-loader {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 24px;
+    }
+    .page-loader.active {
+      display: flex;
+    }
+    .footer-note {
+      text-align: center;
+      margin-top: 50px;
+      font-size: 14px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div>
+      <div class="logo">
+        <a href="/"><img src="/static/petrusky-logo.png" alt="Petrus Ky Logo"></a>
+      </div>
+      <div class="menu-section">
+        <div class="menu-title">🎓 Giáo viên</div>
+        <a href="/bots/bibi_grammar.html" class="menu-item">🧠 <span>BiBi Dạy Ngữ Pháp</span></a>
+        <a href="/bots/bibi_lesson_plan.html" class="menu-item">📝 <span>Soạn giáo án</span></a>
+        <a href="/bots/test_creator.html" class="menu-item">📋 <span>Tạo đề kiểm tra</span></a>
+        <a href="/bots/teacher_consult.html" class="menu-item">👩‍🏫 <span>Tư vấn chuyên môn</span></a>
+        <a href="/bots/bibi_feedback_admin.html" class="menu-item">📊 <span>Bibi Lấy phản hồi</span></a>
+      </div>
+      <div class="menu-section">
+        <div class="menu-title">👨‍🎓 Học sinh</div>
+        <a href="/bots/english_tutor.html" class="menu-item">📘 <span>Gia sư Tiếng Anh</span></a>
+        <a href="/bots/math_tutor.html" class="menu-item">🧮 <span>Giáo viên Toán</span></a>
+        <a href="/bots/pronunciation.html" class="menu-item">🔊 <span>Luyện phát âm</span></a>
+        <a href="/bots/listening.html" class="menu-item">🎧 <span>Nghe hiểu</span></a>
+        <a href="/bots/reading.html" class="menu-item">📖 <span>Đọc hiểu</span></a>
+        <a href="/bots/grammar_quiz.html" class="menu-item">🔤 <span>Trắc nghiệm ngữ pháp</span></a>
+        <a href="/bots/writing.html" class="menu-item">✍️ <span>Viết đoạn văn</span></a>
+        <a href="/bots/vocab_themes.html" class="menu-item">📚 <span>Từ vựng theo chủ đề</span></a>
+      </div>
+    </div>
+    <div class="theme-toggle">
+      <button onclick="toggleTheme()">🌞 / 🌙 Đổi giao diện</button>
+    </div>
+  </div>
+  <div class="main-content">
+  <div class="page-loader" id="loader">Đang tải...</div>
+  <div class="header-bar">    
+    <h1>Bạn muốn hỗ trợ với AI nào?</h1>
+    <div style="width: 150px"></div>
+  </div>
+
+  <div class="search-container">
+    <input type="text" class="search-box" placeholder="Tìm kiếm bot..." oninput="filterBots(this.value)">
+  </div>
+
+  <div class="section-title">Hỗ trợ giáo viên</div>
+  <div class="bot-grid">
+    <a href="/bots/bibi_grammar.html" class="bot-card"><img src="/static/ai1.png"><div class="bot-name">BiBi Dạy Ngữ Pháp</div><div class="bot-role">Giáo viên</div></a>
+    <a href="/bots/bibi_lesson_plan.html" class="bot-card"><img src="/static/ai3.png"><div class="bot-name">Soạn giáo án</div><div class="bot-role">Giáo viên</div></a>
+    <a href="/bots/test_creator.html" class="bot-card"><img src="/static/ai4.png"><div class="bot-name">Tạo đề kiểm tra</div><div class="bot-role">Giáo viên</div></a>
+    <a href="/bots/teacher_consult.html" class="bot-card"><img src="/static/ai5.png"><div class="bot-name">Tư vấn chuyên môn</div><div class="bot-role">Giáo viên</div></a>
+    <a href="/bots/bibi_feedback_admin.html" class="bot-card"><img src="/static/ai2.png"><div class="bot-name">Bibi Lấy phản hồi</div><div class="bot-role">Quản trị</div></a>
+  </div>
+
+  <div class="section-title">Hỗ trợ học sinh</div>
+  <div class="bot-grid">
+    <a href="/bots/english_tutor.html" class="bot-card"><img src="/static/ai6.png"><div class="bot-name">Gia sư Tiếng Anh</div><div class="bot-role">Học sinh</div></a>
+    <a href="/bots/math_tutor.html" class="bot-card"><img src="/static/ai7.png"><div class="bot-name">Giáo Viên Toán</div><div class="bot-role">Học sinh</div></a>
+    <a href="/bots/pronunciation.html" class="bot-card"><img src="/static/ai8.png"><div class="bot-name">Luyện phát âm</div><div class="bot-role">Học sinh</div></a>
+    <a href="/bots/listening.html" class="bot-card"><img src="/static/ai9.png"><div class="bot-name">Dạy nghe hiểu</div><div class="bot-role">Học sinh</div></a>
+    <a href="/bots/reading.html" class="bot-card"><img src="/static/ai10.png"><div class="bot-name">Dạy đọc hiểu</div><div class="bot-role">Học sinh</div></a>
+    <a href="/bots/grammar_quiz.html" class="bot-card"><img src="/static/ai11.png"><div class="bot-name">Trắc nghiệm ngữ pháp</div><div class="bot-role">Học sinh</div></a>
+    <a href="/bots/writing.html" class="bot-card"><img src="/static/ai12.png"><div class="bot-name">Viết đoạn văn</div><div class="bot-role">Học sinh</div></a>
+    <a href="/bots/vocab_themes.html" class="bot-card"><img src="/static/ai13.png"><div class="bot-name">Từ vựng theo chủ đề</div><div class="bot-role">Học sinh</div></a>
+  </div>
+
+  <div class="footer-note">AI có thể mắc lỗi. Hãy kiểm tra các thông tin quan trọng.</div>
+
+  <audio id="clickSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_fef0c83d99.mp3"></audio>
+  <script>
+    function filterBots(query) {
+      query = query.toLowerCase();
+      const bots = document.querySelectorAll('.bot-card');
+      bots.forEach(bot => {
+        const name = bot.querySelector('.bot-name').innerText.toLowerCase();
+        const role = bot.querySelector('.bot-role').innerText.toLowerCase();
+        bot.classList.toggle('hidden', !name.includes(query) && !role.includes(query));
+      });
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      const newTheme = body.classList.toggle("dark");
+      localStorage.setItem("theme", newTheme ? "dark" : "light");
+    }
+
+    function goToBot(event) {
+      event.preventDefault();
+      document.getElementById("clickSound").play();
+      const link = event.currentTarget;
+      const loader = document.getElementById("loader");
+      document.body.classList.add('fade-out');
+      loader.classList.add("active");
+      setTimeout(() => {
+        window.location.href = link.href;
+      }, 500);
+    }
+
+    window.onload = function () {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark") {
+        document.body.classList.add("dark");
+      }
+
+      document.querySelectorAll('.bot-card').forEach(card => {
+        card.addEventListener('click', goToBot);
+      });
+    }
+  </script>
+</body>
+</html>

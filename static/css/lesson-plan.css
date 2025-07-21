@@ -1,0 +1,1070 @@
+/* CSS cho tính năng Soạn giáo án - OPTIMIZED FINAL VERSION */
+
+/* ========== CORE LAYOUT - SIDEBAR FIX ========== */
+
+.bibi-lesson-plan-app .lesson-plan-container,
+body .lesson-plan-container,
+.lesson-plan-container {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 0px;
+  width: 100vw;
+  min-height: calc(100vh - 120px);
+  position: relative;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  left: 0;
+  top: 0;
+}
+
+.bibi-lesson-plan-app .lesson-plan-sidebar,
+body .lesson-plan-sidebar,
+.lesson-plan-sidebar {
+  grid-column: 1;
+  width: 280px;
+  background-color: #f9f9f9;
+  padding: 12px;
+  border-right: 1px solid #ddd;
+  overflow-y: auto;
+  position: relative;
+  height: calc(100vh - 80px);
+  min-height: 600px;
+  max-height: calc(100vh - 80px);
+  box-sizing: border-box;
+  margin: 0;
+  left: 0;
+}
+
+.lesson-plan-content {
+  grid-column: 2;
+  padding: 20px;
+  background-color: #fff;
+  min-height: calc(100vh - 120px);
+  box-sizing: border-box;
+  overflow-x: auto;
+  margin: 0;
+  position: relative;
+  left: 0;
+  width: 100%;
+}
+
+/* Header alignment */
+.bibi-lesson-plan-app .smart-header {
+  width: 100vw;
+  margin: 0;
+  padding: 12px 20px;
+  box-sizing: border-box;
+  position: relative;
+  left: 0;
+}
+
+.bibi-lesson-plan-app .lesson-plan-container {
+  margin-top: 0;
+  position: relative;
+  top: 0;
+}
+
+.bibi-lesson-plan-app .lesson-plan-sidebar {
+  padding-left: 20px;
+  box-sizing: border-box;
+}
+
+/* Dark theme - consolidated */
+.dark-theme .lesson-plan-sidebar {
+  background-color: #232323;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+}
+
+.dark-theme .lesson-plan-content {
+  background-color: #1a1a1a;
+}
+
+/* ========== BASIC STYLING ========== */
+
+.logo-separator {
+  width: 1px;
+  height: 24px;
+  background-color: #ddd;
+  margin: 0 10px;
+}
+
+.school-logo {
+  height: 30px;
+  margin: 0 5px;
+  border-radius: 4px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Tab content */
+.tab-content {
+  display: none;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+#history-content {
+  display: none;
+  height: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+/* ========== FORM STYLING ========== */
+
+.lesson-plan-form {
+  margin-top: 0px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lesson-plan-sidebar h3 {
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #eee;
+}
+
+.lesson-plan-form h4 {
+  margin-top: 15px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.radio-group {
+  margin: 8px 0 12px 0;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+  font-size: 15px;
+  color: #333;
+}
+
+.form-group select,
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.form-group .hint {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.form-panel {
+  background-color: #fff;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+.form-panel h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #2196F3;
+}
+
+/* ========== BUTTONS ========== */
+
+.action-btn {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.primary-btn {
+  background-color: #4CAF50;
+  color: white;
+  font-size: 16px;
+  width: 100%;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.sticky-btn {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.primary-btn:hover {
+  background-color: #3d8b40;
+}
+
+.btn-success {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  transition: background-color 0.3s;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+}
+
+/* ========== OUTPUT AREA ========== */
+
+.output-area {
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  min-height: 300px;
+  padding: 20px;
+}
+
+.welcome-message {
+  text-align: center;
+  max-width: 700px;
+  margin: 40px auto;
+}
+
+.welcome-message h3 {
+  color: #4a6fa5;
+  margin-bottom: 20px;
+}
+
+.welcome-message ul {
+  text-align: left;
+  margin-top: 20px;
+}
+
+.welcome-message li {
+  margin-bottom: 10px;
+}
+
+/* ========== LESSON PLAN CARD ========== */
+
+.lesson-plan-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+
+.lesson-plan-card .card-header {
+  background-color: #f5f5f5;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lesson-plan-card .card-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.lesson-plan-card .card-body {
+  padding: 12px 16px;
+}
+
+.lesson-plan-card .card-section {
+  margin-bottom: 12px;
+}
+
+.lesson-plan-card .card-section h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: #2196F3;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
+}
+
+.lesson-plan-card .card-section-content {
+  padding-left: 10px;
+}
+
+.card-content {
+  min-height: 100px;
+  padding: 15px 0;
+  display: block;
+  overflow: visible;
+}
+
+/* ========== DARK THEME - CONSOLIDATED ========== */
+
+.dark-theme .lesson-plan-form h4,
+.dark-theme .form-group label {
+  color: #ddd;
+}
+
+.dark-theme .form-group select,
+.dark-theme .form-group input,
+.dark-theme .form-group textarea {
+  background-color: #333;
+  border-color: #444;
+  color: #ddd;
+}
+
+.dark-theme .output-area,
+.dark-theme .form-panel,
+.dark-theme .lesson-plan-card,
+.dark-theme .lesson-plan-card .card-body {
+  background-color: #2a2a2a;
+  color: #ddd;
+}
+
+.dark-theme .lesson-plan-card .card-header {
+  background-color: #333;
+  border-bottom-color: #444;
+}
+
+.dark-theme .lesson-plan-card .card-section h4 {
+  color: #4dabf7;
+  border-bottom-color: #444;
+}
+
+/* ========== CONTENT STYLING ========== */
+
+.lesson-content {
+  display: block;
+  margin-bottom: 20px;
+  line-height: 1.5;
+  width: 100%;
+}
+
+.section-heading {
+  margin-top: 8px;
+  margin-bottom: 4px;
+  line-height: 1.4;
+  font-size: 17px;
+  font-weight: 600;
+  color: #2c3e50;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
+}
+
+.item-list {
+  margin: 4px 0;
+  padding-left: 1.2em;
+}
+
+.item, .numbered-item {
+  margin-bottom: 1px;
+  line-height: 1.3;
+  font-size: 15px;
+}
+
+.paragraph {
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+/* ========== RAG SOURCES ========== */
+
+.rag-sources-simple {
+  margin-top: 20px;
+  margin-bottom: 0;
+  padding: 12px 15px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #4a6fa5;
+}
+
+.rag-sources-simple h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #4a6fa5;
+}
+
+.source-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  background-color: #e7f3ff;
+  color: #3a6ea5;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ========== FEEDBACK SYSTEM ========== */
+
+.feedback-section {
+  margin-top: 30px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 15px 20px;
+  border: 1px solid #eee;
+  display: block;
+}
+
+.feedback-stars {
+  display: flex;
+  margin: 15px 0;
+  align-items: center;
+}
+
+.feedback-stars .star {
+  color: transparent;
+  -webkit-text-stroke: 1px #aaa;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 24px;
+  display: inline-block;
+  margin: 0 3px;
+}
+
+.feedback-stars .star:hover,
+.feedback-stars .star.selected {
+  color: #FFD700;
+  -webkit-text-stroke: 1px #e0b000;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+.feedback-form textarea {
+  width: 100%;
+  height: 100px;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  resize: none;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  font-family: inherit;
+}
+
+.feedback-submit-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.feedback-submit-btn:hover {
+  background-color: #45a049;
+}
+
+/* ========== APP HEADER ========== */
+
+.bibi-lesson-plan-app {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: #f9f9f9;
+  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.bibi-lesson-plan-app .smart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  height: 60px;
+}
+
+.bibi-lesson-plan-app .header-left,
+.bibi-lesson-plan-app .header-right {
+  display: flex;
+  align-items: center;
+}
+
+.bibi-lesson-plan-app .home-btn {
+  text-decoration: none;
+  color: #333;
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.bibi-lesson-plan-app .home-btn:hover {
+  background-color: #f5f5f5;
+  color: #333;
+  text-decoration: none;
+}
+
+/* ========== TABS NAVIGATION ========== */
+
+.bibi-lesson-plan-app .tabs-navigation {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  position: sticky;
+  top: 60px;
+  z-index: 99;
+  display: block;
+}
+
+.bibi-lesson-plan-app .tabs-container {
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.bibi-lesson-plan-app .tab-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 15px 20px;
+  min-width: 120px;
+  border: none;
+  background: none;
+  color: #6c757d;
+  cursor: pointer;
+  transition: 0.3s;
+  position: relative;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.bibi-lesson-plan-app .tab-btn.active {
+  font-weight: 600;
+  color: #4a6fa5;
+}
+
+.bibi-lesson-plan-app .tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #4a6fa5;
+}
+
+/* ========== WELCOME MESSAGES ========== */
+
+.tab-welcome-message {
+  text-align: center;
+  max-width: 700px;
+  margin: 20px auto;
+  padding: 15px;
+  background-color: #f5f9ff;
+  border-radius: 8px;
+  border-left: 4px solid #4a6fa5;
+  color: #333;
+}
+
+.tab-welcome-message h3 {
+  color: #4a6fa5;
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* ========== ANIMATIONS ========== */
+
+@keyframes typingDots {
+  0% { width: 0; }
+  50% { width: 12px; }
+  100% { width: 0; }
+}
+
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(0.5); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ========== RAG STATUS ========== */
+
+.rag-status-message {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #f5f5f5;
+  transition: all 0.3s ease;
+}
+
+.rag-status-message.success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.rag-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 5px;
+}
+
+/* ========== CONTENT BLOCKS ========== */
+
+.vocab-block {
+  background-color: #f0f8ff;
+  padding: 10px 12px;
+  border-left: 4px solid #42a5f5;
+  border-radius: 6px;
+  margin: 8px 0;
+}
+
+.analysis-block {
+  background-color: #fff8e1;
+  border-left: 4px solid #fbc02d;
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin: 8px 0;
+  font-style: italic;
+}
+
+.example-block {
+  background-color: #e8f5e9;
+  border-left: 4px solid #66bb6a;
+  padding: 8px 12px;
+  border-radius: 5px;
+  margin: 6px 0;
+  font-style: italic;
+}
+
+/* ========== SUPPLEMENTARY CONTENT ========== */
+
+.exercise-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.supp-content {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 768px) {
+  .lesson-plan-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .tabs-container {
+    flex-wrap: wrap;
+  }
+  
+  .tab-btn {
+    min-width: 120px;
+    margin-bottom: 4px;
+  }
+}
+
+/* ========== GRID POSITIONING ========== */
+
+#main-content,
+#supplementary-content,
+#review-content,
+#extracurricular-content,
+#test-content {
+  grid-column: 2;
+  padding: 20px;
+  background-color: #fff;
+  min-height: calc(100vh - 120px);
+  box-sizing: border-box;
+  overflow-x: auto;
+  margin: 0;
+  position: relative;
+  left: 0;
+  width: 100%;
+}
+
+/* =====================================================================
+   CRITICAL FIXES - TAB SPECIFIC FUNCTIONALITY
+   ===================================================================== */
+
+/* ========== TAB SIDEBAR VISIBILITY MANAGEMENT ========== */
+
+/* Ensure only one sidebar is visible at a time */
+.lesson-plan-sidebar {
+  display: none; /* Ẩn tất cả sidebar mặc định */
+}
+
+.lesson-plan-sidebar.active {
+  display: block; /* Chỉ hiển thị sidebar có class active */
+}
+
+#main-sidebar {
+  display: block !important;
+}
+
+#main-sidebar.hidden {
+  display: none !important;
+}
+
+/* ========== FORM CONTAINER ALIGNMENT - CRITICAL FIX ========== */
+
+/* Radio button containers for Test tab */
+.radio-container {
+  display: flex !important;
+  align-items: center !important;
+  margin-bottom: 10px !important;
+  position: relative !important;
+}
+
+.radio-container input[type="radio"] {
+  margin: 0 !important;
+  margin-right: 10px !important;
+  position: relative !important;
+  top: 0 !important;
+}
+
+/* Checkbox containers for Review tab */
+.checkbox-container {
+  display: flex !important;
+  align-items: center !important;
+  position: relative !important;
+  margin-bottom: 5px !important;
+}
+
+.checkbox-container input[type="checkbox"] {
+  margin-right: 8px !important;
+  position: relative !important;
+  top: 0 !important;
+}
+
+/* ========== RADIO GROUP IMPROVEMENTS ========== */
+
+.radio-group.better-aligned {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 8px 0;
+}
+
+.radio-group.better-aligned .radio-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.radio-group.better-aligned input[type="radio"] {
+  margin: 0 8px 0 0;
+  position: relative;
+  top: 0;
+}
+
+/* ========== SKILLS CHECKBOXES IMPROVEMENTS ========== */
+
+.skills-checkboxes {
+  display: flex;
+  flex-direction: column;              /* ← Giữ default cho general */
+  gap: 5px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  padding: 10px;
+  margin-top: 5px;
+}
+
+/* ✅ ADD này (đúng selector từ HTML): */
+#review-skills-checkboxes.skills-list-with-separator {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 2px !important;
+  align-items: center !important;
+  justify-content: start !important;
+  line-height: 1.8 !important;
+  background-color: transparent !important;  /* ✅ Trong suốt như TT */
+  border: none !important;                   /* ✅ Không border */
+  border-radius: 0 !important;              /* ✅ Không bo góc */
+  padding: 4px !important;                  /* ✅ Padding tối thiểu */
+  margin-top: 10px !important;              /* ✅ Margin như TT */
+}
+
+#review-skills-checkboxes .skill-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  font-size: 14px !important;
+  white-space: nowrap !important;
+  margin-right: 0 !important;
+  background-color: transparent !important;  /* ✅ Trong suốt */
+}
+
+#review-skills-checkboxes .skill-item input[type="checkbox"] {
+  margin-right: 6px !important;
+  margin-left: 0 !important;
+  transform: scale(1) !important;
+  accent-color: #28a745 !important;         /* ✅ Giữ màu xanh cho checkbox */
+}
+
+#review-skills-checkboxes .skill-separator {
+  margin: 0 2px !important;
+  color: #888 !important;
+}
+
+/* ========== REVIEW TAB SPECIFIC CSS ========== */
+
+#review-sidebar h3 {
+  color: #333 !important; /* Same as TT */
+  padding-bottom: 8px !important;
+  margin-bottom: 16px !important;
+}
+
+/* Review form styling */
+#review-form-container .form-group label {
+  color: #155724 !important;
+  font-weight: 600 !important;
+}
+
+#review-skills-main-container {
+  background: #e8f5e8 !important;
+  border: 1px solid #c3e6cb !important;
+  border-radius: 8px !important;
+  padding: 12px !important;
+  margin-top: 8px !important;
+}
+
+#review-skills-main-container label {
+  color: #155724 !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+  display: block !important;
+}
+
+.skills-checkboxes .checkbox-container {
+  margin-bottom: 6px !important;
+}
+
+.review-form-section .skills-checkboxes .checkbox-container {
+  margin-bottom: 6px;
+}
+
+.skills-checkboxes .checkbox-container input[type="checkbox"] {
+  accent-color: #28a745 !important;
+  margin-right: 8px !important;
+}
+
+/* Review form section */
+.review-form-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #e9ecef;
+  display: none; /* Mặc định ẩn */
+}
+
+.review-form-section.active {
+  display: block !important;
+}
+
+.review-form-section h3 {
+  color: #155724;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #c3e6cb;
+}
+
+.review-skills-container {
+  background: #e8f5e8;
+  border: 1px solid #c3e6cb;
+  border-radius: 6px;
+  padding: 10px;
+  margin-top: 8px;
+}
+
+/* ========== SUPPLEMENTARY TAB SPECIFIC CSS ========== */
+
+/* Override mạnh cho Supplementary */
+#supp-skills-checkboxes {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 2px !important;
+  align-items: center !important;
+  justify-content: start;
+  line-height: 1.8;
+}
+
+#supp-skills-checkboxes .skill-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+#supp-skills-checkboxes .skill-item input[type="checkbox"] {
+  margin-right: 6px !important;  /* ← SỬA từ margin-left thành margin-right */
+  transform: scale(1); /* to make checkbox bigger */
+}
+
+#supp-skills-checkboxes .skill-separator {
+  margin: 0 2px !important;
+  color: #888 !important;
+}
+
+#supp-exercise-types-container {
+  margin-top: 16px;
+  border: 1px solid #e0e0e0;
+  padding: 12px;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+/* ========== DYNAMIC CONTENT SWITCHING ========== */
+
+.main-sidebar-content {
+  display: block;
+}
+
+.main-sidebar-content.hidden {
+  display: none !important;
+}
+
+/* Đảm bảo wizard form có thể được ẩn khi cần */
+#lesson-plan-wizard {
+  display: block;
+}
+
+#lesson-plan-wizard.hidden {
+  display: none !important;
+}
+
+/* ========== FORCE GRID POSITIONING FOR ALL CONTENT AREAS ========== */
+
+#main-content,
+#supplementary-content,
+#review-content,
+#extracurricular-content,
+#test-content {
+  grid-column: 2 !important;
+  padding: 20px !important;
+  background-color: #fff !important;
+  min-height: calc(100vh - 120px) !important;
+  box-sizing: border-box !important;
+  overflow-x: auto !important;
+  margin: 0 !important;
+  position: relative !important;
+  left: 0 !important;
+  width: 100% !important;
+}
+
+/* ========== HEADER SEARCH & LANGUAGE - RESTORE MISSING CSS ========== */
+
+/* Search container and input */
+.bibi-lesson-plan-app .search-container {
+  position: relative !important;
+  width: 100% !important;
+}
+
+.bibi-lesson-plan-app #topic-search {
+  width: 350px !important;
+  height: 38px !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 20px !important;
+  font-size: 15px !important;
+  padding-left: 40px !important;
+}
+
+/* Language selector */
+.bibi-lesson-plan-app .language-selector {
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 15px !important;
+}
+
+.bibi-lesson-plan-app .lang-btn {
+  font-size: 16px !important;
+  padding: 8px 10px !important;
+  margin: 0 4px !important;
+  border-radius: 4px !important;
+  border: none !important;
+  background-color: transparent !important;
+  transition: all 0.2s ease !important;
+}
+
+.bibi-lesson-plan-app .lang-btn.active {
+  background-color: #f0f8ff !important;
+  box-shadow: 0 0 0 1px #4a6fa5 !important;
+}
+
+.bibi-lesson-plan-app .lang-btn:hover {
+  background-color: #f5f5f5 !important;
+}
+
+/* RAG status indicator */
+.bibi-lesson-plan-app .rag-status {
+  display: flex !important;
+  align-items: center !important;
+  margin-right: 15px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  background-color: #f2f2f2 !important;
+  transition: all 0.3s ease !important;
+}
+
+.bibi-lesson-plan-app .rag-status.active {
+  color: white !important;
+  background-color: #4CAF50 !important;
+}
+
+.bibi-lesson-plan-app .rag-status.inactive {
+  color: white !important;
+  background-color: #F44336 !important;
+}

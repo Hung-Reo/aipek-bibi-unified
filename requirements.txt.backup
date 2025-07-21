@@ -1,0 +1,42 @@
+# Core RAG components
+langchain>=0.1.0
+langchain-community>=0.0.30
+langchain-core>=0.1.52
+langchain-openai>=0.0.8
+langchain-pinecone>=0.1.2
+openai>=1.74.0
+pinecone-client>=4.1.2
+
+# Web interface
+streamlit>=1.44.0
+fastapi>=0.115.0
+uvicorn>=0.15.0
+pydantic>=2.0.0
+
+# Document processing
+pymupdf>=1.22.5
+pypdf>=3.15.1
+pdfplumber>=0.10.2
+pdfminer.six>=20221105
+
+# Data processing
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.6.0
+nltk>=3.9.0
+sentence-transformers>=2.2.2
+
+# Utilities
+python-dotenv>=1.0.0
+apscheduler>=3.10.4
+tqdm>=4.67.0
+matplotlib>=3.0.0
+requests>=2.31.0
+beautifulsoup4==4.12.2
+
+# Optional: Vector database alternatives
+faiss-cpu>=1.7.4
+
+# ✅ NEW: Static files serving for unified deployment
+jinja2>=3.1.0
+aiofiles>=23.0.0

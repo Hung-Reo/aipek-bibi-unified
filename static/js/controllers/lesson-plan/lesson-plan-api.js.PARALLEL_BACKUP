@@ -1,0 +1,418 @@
+// /static/js/controllers/lesson-plan/lesson-plan-api.js
+// Module kết nối với API - CLEANED: Review expansion moved to prompts level
+// ✅ SAFE: Only Review logic removed, Main/TT logic preserved
+// ✅ UNIFIED: Updated for single server deployment (removed proxy URLs)
+
+import { LessonPlanRAG } from './lesson-plan-rag.js';
+
+export class LessonPlanAPI {
+  constructor(options = {}) {
+    // ✅ UNIFIED UPDATE: Direct API calls to same server, no proxy
+    const baseUrl = window.location.origin; // Same server for unified deployment
+    
+    this.baseUrl = options.baseUrl || `${baseUrl}/api`;
+    
+    // ✅ UNIFIED: Direct chat endpoint (no proxy)
+    this.chatEndpoint = options.chatEndpoint || `${baseUrl}/api/chat`;
+    this.lessonPlanEndpoint = options.lessonPlanEndpoint || `${this.baseUrl}/lesson-plan`;
+    
+    // Khởi tạo RAG client
+    this.rag = new LessonPlanRAG({
+        namespaces: ["bibi_sgk", "bibi_ctgd", "bibi_lesson_plan"],
+        defaultNamespace: "bibi_lesson_plan",
+        enabled: true,
+        debug: options.debug || false
+    });
+    
+    // Kiểm tra trạng thái kết nối RAG
+    this.ragAvailable = false;
+    this.checkRAGStatus();
+    
+    console.log('🔌 LessonPlanAPI khởi tạo thành công (unified deployment)');
+  }
+
+  // Kiểm tra trạng thái kết nối RAG
+  async checkRAGStatus() {
+    try {
+      this.ragAvailable = await this.rag.checkConnection();
+      console.log(`RAG Status: ${this.ragAvailable ? 'Connected ✅' : 'Disconnected ❌'}`);
+      return this.ragAvailable;
+    } catch (error) {
+      console.error('Error checking RAG status:', error);
+      this.ragAvailable = false;
+      return false;
+    }
+  }
+
+  // Gửi yêu cầu đến API để tạo giáo án
+  async generateLessonPlan(messages, streamCallback, options = {}) {
+    try {
+      console.log("DEBUG: Bắt đầu tạo giáo án với API");
+      
+      // Khai báo biến kiểm tra độ dài NGAY TỪ ĐẦU hàm - đây là phần sửa lỗi chính
+      let contentLengthChecked = false;
+      let startTime = Date.now(); // Lưu thời điểm bắt đầu
+      
+      // ✅ CLEANED: Removed extracurricular-specific useRAG logic
+      const useRAG = options.useRAG !== false && this.ragAvailable;
+      const lessonType = options.lessonType || 'main';
+      const ragQuery = options.ragQuery || '';
+      const modelToUse = options.model || 'gpt-4.1';
+      
+      // Chuẩn bị thông tin RAG
+      let ragInfo = {
+        attempted: useRAG,
+        usedRAG: false,
+        sources: [],
+        searching: useRAG,
+        startTime: Date.now(),
+        endTime: null,
+        error: null,
+        namespaces: []
+      };
+      
+      // Không chờ kết quả RAG, gửi truy vấn RAG song song
+      let ragPromise = null;
+      
+      if (useRAG && ragQuery) {
+        // Thông báo đang tìm kiếm
+        streamCallback('', '', {
+          ...ragInfo,
+          currentStage: "Đang tìm thông tin tham khảo..."
+        });
+        
+        console.log("DEBUG: Bắt đầu tìm kiếm RAG", ragQuery);
+        
+        // Bắt đầu tìm kiếm song song, không chờ đợi
+        ragPromise = this.rag.searchFastFirst(ragQuery, {
+          lessonType: lessonType,
+          timeout: 25000 // 🚀 PHASE 2 FIX: 8s → 25s (backend cần 30-45s)
+        }).then(results => {
+          // Xử lý kết quả RAG nếu thành công
+          if (results && results.success && results.results && results.results.length > 0) {
+            console.log(`DEBUG: Tìm thấy ${results.results.length} kết quả RAG`);
+            
+            // Cập nhật thông tin RAG
+            ragInfo.searching = false;
+            ragInfo.endTime = Date.now();
+            ragInfo.usedRAG = true;
+            ragInfo.sources = results.results.map(result => {
+              const metadata = result.metadata || {};
+              const source = metadata.source || metadata.namespace || 'Chương trình giáo dục';
+              return `${source} - ${result.content?.substring(0, 80)}...`;
+            });
+            ragInfo.namespaces = Array.from(new Set(results.results.map(r => r.namespace || '')));
+            
+            // Gửi thông tin RAG qua callback
+            streamCallback('', '', ragInfo);
+            
+            // 🚀 SỬA 3: RAG enhancement sau khi OpenAI đã start - inject vào stream
+            // Lưu RAG results để inject vào content stream later
+            ragInfo.enhancementData = results;
+            console.log("DEBUG: Lưu RAG results để enhance content during streaming");
+            
+            return results;
+          } else {
+            console.log("DEBUG: Không tìm thấy kết quả RAG phù hợp");
+            ragInfo.searching = false;
+            ragInfo.endTime = Date.now();
+            ragInfo.usedRAG = false;
+            streamCallback('', '', ragInfo);
+            return null;
+          }
+        }).catch(error => {
+          console.warn("DEBUG: Lỗi khi tìm kiếm RAG:", error.message);
+          ragInfo.searching = false;
+          ragInfo.endTime = Date.now();
+          ragInfo.error = error.message;
+          streamCallback('', '', ragInfo);
+          return null;
+        });
+      } else {
+        console.log("DEBUG: Không sử dụng RAG hoặc không có query");
+      }
+      
+      // Kiểm tra kích thước messages
+      const messagesSize = JSON.stringify(messages).length;
+      if (messagesSize > 100000) {
+        console.log(`DEBUG: Messages quá lớn (${messagesSize/1024}KB), tối ưu hóa...`);
+        // Tối ưu hóa messages nếu cần
+      }
+      
+      // Tạo controller cho request
+      const abortController = new AbortController();
+      const { signal } = abortController;
+      
+      // Timeout 60 giây (optimized from 120s)
+      const timeoutId = setTimeout(() => abortController.abort(), 60000);
+      
+      // ✅ CLEANED: Removed extracurricular override patches
+      // Gửi API request
+      console.log("DEBUG: Gửi API request với", options.maxTokens, "tokens");
+
+      const response = await fetch(this.chatEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          messages: messages,
+          model: modelToUse,
+          temperature: options.temperature || 0.9,
+          top_p: 0.95, // ✅ CLEANED: Removed conditional extracurricular logic
+          max_tokens: options.maxTokens || 16000,
+          stream: true,
+          ragInfo: ragInfo,
+          lessonType: options.lessonType || 'main',
+          ragQuery: options.ragQuery || '',
+          detailed_content: options.requireDetailedContent !== false
+        }),
+        signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        console.error(`DEBUG: API error: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      // Xử lý streaming
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = '';
+      let fullContent = '';
+      
+      console.log("DEBUG: Xử lý streaming response");
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+            try {
+              const jsonData = JSON.parse(line.slice(6));
+              const content = jsonData.choices[0]?.delta?.content || '';
+              if (content) {
+                fullContent += content;
+                streamCallback(content, fullContent, null);
+                
+                // Kiểm tra độ dài trong quá trình streaming
+                if (!contentLengthChecked && fullContent.length > 4000) {
+                  contentLengthChecked = true;
+                  
+                  // Dự đoán độ dài cuối cùng
+                  const elapsedTime = Date.now() - startTime;
+                  const projectedLength = Math.round((fullContent.length / elapsedTime) * 90000); // 90 giây
+                  
+                  // ✅ ENHANCED: Only apply expansion guidance for Main/TT, SKIP Review
+                  if (options.lessonType !== 'review' && projectedLength < 13000) {
+                    // Keep original expansion logic for Main/TT tabs only
+                    console.log(`⚠️ Cảnh báo: Dự đoán nội dung sẽ quá ngắn (~${projectedLength} ký tự)`);
+                    
+                    const expansionGuidance = `\n\n⚠️⚠️⚠️ CẢNH BÁO: NỘI DUNG DỰ KIẾN QUÁ NGẮN! ⚠️⚠️⚠️
+
+                Hãy MỞ RỘNG TẤT CẢ các phần tiếp theo với mức độ chi tiết cao nhất:
+
+                1. Tiến trình dạy học (Procedures): Mô tả CỰC KỲ CHI TIẾT từng hoạt động
+                  - Script đầy đủ những gì giáo viên sẽ nói
+                  - Câu hỏi và câu trả lời mẫu cho mỗi hoạt động
+                  - Hướng dẫn chi tiết cho mỗi Task
+
+                2. Phân tích ngôn ngữ (Language Analysis): Mô tả ít nhất 10 từ/cấu trúc
+                  - Phân tích đầy đủ Form, Meaning, Pronunciation, Vietnamese, Example
+                  - Ví dụ cụ thể cho mỗi từ/cấu trúc
+
+                3. Tất cả các phần khác: Mở rộng ít nhất gấp đôi chi tiết
+
+                GIÁO ÁN PHẢI ĐẠT TỐI THIỂU 15,000 KÝ TỰ!\n\n`;
+                    
+                    streamCallback(expansionGuidance, fullContent + expansionGuidance, {
+                      lengthWarning: true,
+                      projected: projectedLength
+                    });
+                  }
+                  // ✅ NEW: Skip any expansion for Review (handled by prompts)
+                  else if (options.lessonType === 'review') {
+                    console.log(`✅ Review detected (${projectedLength} chars predicted) - relying on prompt-level expansion`);
+                  }
+                }
+              }
+            } catch (e) {
+              console.error("DEBUG: Lỗi khi xử lý JSON streaming:", e);
+            }
+          }
+        }
+      }
+      
+      console.log(`DEBUG: Streaming hoàn tất, tổng ${fullContent.length} ký tự`);
+      
+      // ✅ ENHANCED: Check content length với Review bypass
+      if (fullContent) {
+        // ✅ CLEANED: SGK content length targets only (removed extracurricular)
+        let targetLength, minLength;
+
+        if (options.lessonType === 'review') {
+          targetLength = 15000;  // Review requirements
+          minLength = 13000;     // Production stable
+        } else {
+          targetLength = 15000;  // main/supplementary stable
+          minLength = 12000;     // Production proven
+        }
+
+        const currentLength = fullContent.length;
+
+        // ✅ KEY CHANGE: Skip expansion for Review completely
+        if (options.lessonType === 'review' || options.lessonType === 'test') {
+          console.log(`✅ Review content: ${currentLength} chars - bypassing API expansion (handled by prompts)`);
+          
+          // Just log the length for Review, no expansion
+          if (!ragInfo) ragInfo = {};
+          ragInfo.reviewContentLength = currentLength;
+          ragInfo.reviewBypassedExpansion = true;
+          streamCallback('', fullContent, ragInfo);
+          
+        } else if (currentLength < minLength) {
+          // ✅ PRESERVE: Main/TT expansion logic unchanged
+          console.log(`DEBUG: Nội dung quá ngắn (${currentLength} ký tự / ${targetLength} mục tiêu cho ${options.lessonType})`);
+          
+          // Tìm kiếm điểm kết thúc - nơi có thể chèn thêm thông tin
+          let insertPoint = fullContent.lastIndexOf("\n\n");
+          if (insertPoint === -1) insertPoint = fullContent.length;
+          
+          // ✅ CLEANED: Removed extracurricular skip logic - continues with SGK expansion
+          
+          // Tạo thông báo chi tiết hơn - for Main/TT only
+          let additionalGuidance = `
+  
+      —— HƯỚNG DẪN BỔ SUNG ——
+  
+      CẢNH BÁO: Nội dung giáo án hiện tại chỉ có ${currentLength} ký tự, quá ngắn so với yêu cầu tối thiểu 15,000 ký tự.
+  
+      YÊU CẦU MỞ RỘNG KHẨN CẤP:
+      1. Mô tả CHI TIẾT HƠN từng bước trong phần "Tiến trình dạy học"
+      2. Thêm ít nhất 10 từ vựng/cấu trúc vào phần "Phân tích ngôn ngữ" 
+      3. Bổ sung ít nhất 5 khó khăn dự đoán và giải pháp tương ứng
+      4. Mỗi hoạt động trong tiến trình dạy học cần được mô tả bằng ít nhất 10-15 câu
+      5. Phần Board Plan cần chi tiết và đầy đủ hơn
+  
+      Tất cả các phần cần được mở rộng để tổng số ký tự đạt ít nhất 15,000.`;
+
+          // Chèn hướng dẫn bổ sung cho Main/TT
+          fullContent = fullContent.substring(0, insertPoint) + additionalGuidance + fullContent.substring(insertPoint);
+          
+          // Lưu ý kiểm tra độ dài cho lần sau
+          if (!ragInfo) ragInfo = {};
+          ragInfo.contentTooShort = true;
+          ragInfo.currentLength = currentLength;
+          ragInfo.targetLength = targetLength;
+          streamCallback('', fullContent, ragInfo);
+          
+        } else if (currentLength < targetLength) {
+          // Nội dung đạt yêu cầu tối thiểu nhưng chưa đạt mục tiêu - for Main/TT
+          console.log(`DEBUG: Nội dung đủ dài nhưng chưa đạt mục tiêu (${currentLength}/${targetLength} ký tự)`);
+          
+          if (!ragInfo) ragInfo = {};
+          ragInfo.contentAcceptable = true;
+          ragInfo.currentLength = currentLength;
+          ragInfo.targetLength = targetLength;
+        } else {
+          // Nội dung đạt mục tiêu
+          console.log(`DEBUG: Nội dung đạt mục tiêu (${currentLength}/${targetLength} ký tự)`);
+          
+          if (!ragInfo) ragInfo = {};
+          ragInfo.contentOptimal = true;
+          ragInfo.currentLength = currentLength;
+          ragInfo.targetLength = targetLength;
+        }
+      }
+
+      // Đảm bảo ragInfo.searching = false khi kết thúc
+      if (ragInfo.searching) {
+        ragInfo.searching = false;
+        ragInfo.endTime = Date.now();
+        streamCallback('', fullContent, ragInfo);
+      }
+      
+      // Trả về kết quả đầy đủ
+      return {
+        content: fullContent,
+        ragInfo
+      };
+      
+    } catch (error) {
+      console.error('DEBUG: API Error:', error);
+      throw error;
+    }
+  }
+
+  // Lưu giáo án vào localStorage
+  saveLessonPlan(lessonPlan) {
+    try {
+      // Tạo ID duy nhất
+      const id = `lesson_plan_${Date.now()}`;
+      lessonPlan.id = id;
+      lessonPlan.createdAt = new Date().toISOString();
+      
+      // Lấy danh sách giáo án hiện có
+      const savedPlans = JSON.parse(localStorage.getItem('bibi_lesson_plans') || '[]');
+      
+      // Thêm giáo án mới
+      savedPlans.push(lessonPlan);
+      
+      // Giới hạn số lượng giáo án lưu trữ
+      if (savedPlans.length > 50) {
+        savedPlans.shift(); // Xóa giáo án cũ nhất
+      }
+      
+      // Lưu lại
+      localStorage.setItem('bibi_lesson_plans', JSON.stringify(savedPlans));
+      
+      return id;
+    } catch (error) {
+      console.error('Error saving lesson plan:', error);
+      return null;
+    }
+  }
+
+  // Lấy danh sách giáo án đã lưu
+  getLessonPlans() {
+    try {
+      const savedPlans = JSON.parse(localStorage.getItem('bibi_lesson_plans') || '[]');
+      return savedPlans.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } catch (error) {
+      console.error('Error getting lesson plans:', error);
+      return [];
+    }
+  }
+
+  // Lấy giáo án theo ID
+  getLessonPlanById(id) {
+    try {
+      const savedPlans = JSON.parse(localStorage.getItem('bibi_lesson_plans') || '[]');
+      return savedPlans.find(plan => plan.id === id) || null;
+    } catch (error) {
+      console.error('Error getting lesson plan by ID:', error);
+      return null;
+    }
+  }
+
+  // Xóa giáo án theo ID
+  deleteLessonPlan(id) {
+    try {
+      const savedPlans = JSON.parse(localStorage.getItem('bibi_lesson_plans') || '[]');
+      const filteredPlans = savedPlans.filter(plan => plan.id !== id);
+      localStorage.setItem('bibi_lesson_plans', JSON.stringify(filteredPlans));
+      return true;
+    } catch (error) {
+      console.error('Error deleting lesson plan:', error);
+      return false;
+    }
+  }
+}

@@ -1,0 +1,115 @@
+/* print.css - Định dạng CSS đặc biệt chỉ khi in */
+
+/* Thiết lập cơ bản */
+@media print {
+    @page {
+      size: A4;
+      margin: 1cm;
+    }
+    
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 12pt;
+      line-height: 1.5;
+      color: #000;
+      background: #fff;
+    }
+    
+    /* Ẩn các phần không cần thiết khi in */
+    header, .tabs-navigation, .grammar-sidebar, .follow-up-container,
+    .action-buttons-container, .chat-btn, #debug-panel {
+      display: none !important;
+    }
+    
+    /* Container in ấn */
+    .print-container {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    
+    /* Header in ấn */
+    .print-header {
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .print-logo {
+      font-weight: bold;
+      font-size: 14pt;
+    }
+    
+    .print-date {
+      font-size: 10pt;
+    }
+    
+    /* Nội dung in ấn */
+    .print-content {
+      margin-bottom: 20px;
+    }
+    
+    /* Footer in ấn */
+    .print-footer {
+      padding-top: 10px;
+      margin-top: 20px;
+      border-top: 1px solid #ccc;
+      font-size: 9pt;
+      text-align: center;
+      color: #777;
+    }
+    
+    /* Định dạng các phần tử */
+    h1, h2, h3, h4 {
+      page-break-after: avoid;
+      page-break-inside: avoid;
+    }
+    
+    h1 { font-size: 18pt; }
+    h2 { font-size: 16pt; }
+    h3 { font-size: 14pt; }
+    h4 { font-size: 12pt; }
+    
+    p, ul, ol, dl, table {
+      page-break-inside: avoid;
+    }
+    
+    ul, ol {
+      margin-left: 2cm;
+    }
+    
+    li {
+      margin-bottom: 5px;
+    }
+    
+    /* Nguồn RAG */
+    .rag-sources {
+      margin-top: 15px;
+      border-top: 1px dashed #ddd;
+      padding-top: 10px;
+      font-size: 10pt;
+    }
+    
+    .rag-sources h4 {
+      font-size: 11pt;
+      margin: 5px 0;
+    }
+    
+    .rag-source-item {
+      padding-left: 10px;
+      border-left: 2px solid #666;
+      margin-bottom: 5px;
+    }
+    
+    /* Định dạng badge */
+    .rag-badge {
+      display: inline-block;
+      padding: 2px 5px;
+      margin-left: 5px;
+      border-radius: 3px;
+      font-size: 8pt;
+      font-weight: bold;
+    }
+  }

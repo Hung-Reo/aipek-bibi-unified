@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BiBi - Quản lý Phản hồi</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    .admin-container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .admin-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .admin-title h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    
+    .admin-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .admin-button {
+      padding: 8px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .admin-button.secondary {
+      background-color: #607D8B;
+    }
+    
+    .filter-controls {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .filter-group label {
+      font-size: 14px;
+      margin-bottom: 5px;
+      color: #555;
+    }
+    
+    .filter-group select, .filter-group input {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .feedback-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .feedback-table th, .feedback-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .feedback-table th {
+      background-color: #f5f5f5;
+      font-weight: 600;
+    }
+    
+    .feedback-table tr:hover {
+      background-color: #f9f9f9;
+    }
+    
+    .rating-stars {
+      color: #FFD700;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    
+    .empty-state i {
+      font-size: 40px;
+      margin-bottom: 10px;
+      color: #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <div class="admin-header">
+      <div class="admin-title">
+        <h1>Quản lý Phản hồi</h1>
+        <span class="feedback-count" id="feedback-count">0 phản hồi</span>
+      </div>
+      
+      <div class="admin-actions">
+        <button id="export-csv-btn" class="admin-button">
+          <i class="fas fa-download"></i> Xuất CSV
+        </button>
+        <button id="back-btn" class="admin-button secondary">
+          <i class="fas fa-arrow-left"></i> Quay lại
+        </button>
+      </div>
+    </div>
+    
+    <div class="filter-controls">
+      <div class="filter-group">
+        <label for="topic-filter">Lọc theo chủ đề</label>
+        <select id="topic-filter">
+          <option value="">Tất cả chủ đề</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="tab-filter">Lọc theo loại nội dung</label>
+        <select id="tab-filter">
+          <option value="">Tất cả</option>
+          <option value="explain">Giải thích</option>
+          <option value="examples">Ví dụ</option>
+          <option value="exercises">Bài tập</option>
+          <option value="mistakes">Lỗi thường gặp</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="rating-filter">Lọc theo đánh giá</label>
+        <select id="rating-filter">
+          <option value="">Tất cả đánh giá</option>
+          <option value="5">5 sao</option>
+          <option value="4">4 sao</option>
+          <option value="3">3 sao</option>
+          <option value="2">2 sao</option>
+          <option value="1">1 sao</option>
+        </select>
+      </div>
+    </div>
+    
+    <div id="feedback-table-container">
+      <table class="feedback-table">
+        <thead>
+          <tr>
+            <th>Chủ đề</th>
+            <th>Loại nội dung</th>
+            <th>Đánh giá</th>
+            <th>Phản hồi</th>
+            <th>Thời gian</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="feedback-table-body">
+          <!-- Dữ liệu sẽ được thêm vào đây bằng JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <script type="module">
+    import { FeedbackManager } from '/static/js/controllers/feedback.js';
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      // Khởi tạo FeedbackManager
+      const feedbackManager = new FeedbackManager();
+      
+      // Hiển thị dữ liệu
+      renderFeedbackData();
+      
+      // Xử lý nút xuất CSV
+      document.getElementById('export-csv-btn').addEventListener('click', function() {
+        feedbackManager.exportToCSV();
+      });
+      
+      // Xử lý nút quay lại
+      document.getElementById('back-btn').addEventListener('click', function() {
+        window.location.href = '/';
+      });
+      
+      // Xử lý các bộ lọc
+      document.getElementById('topic-filter').addEventListener('change', renderFeedbackData);
+      document.getElementById('tab-filter').addEventListener('change', renderFeedbackData);
+      document.getElementById('rating-filter').addEventListener('change', renderFeedbackData);
+      
+      // Khởi tạo các lựa chọn chủ đề
+      initTopicOptions();
+      
+      // Hàm để hiển thị dữ liệu feedback
+      function renderFeedbackData() {
+        const feedbacks = feedbackManager.getAllFeedbacks();
+        const tableBody = document.getElementById('feedback-table-body');
+        const feedbackCount = document.getElementById('feedback-count');
+        
+        // Lấy giá trị các bộ lọc
+        const topicFilter = document.getElementById('topic-filter').value;
+        const tabFilter = document.getElementById('tab-filter').value;
+        const ratingFilter = document.getElementById('rating-filter').value;
+        
+        // Áp dụng bộ lọc
+        const filteredFeedbacks = feedbacks.filter(feedback => {
+          // Lọc theo chủ đề
+          if (topicFilter && feedback.topic !== topicFilter) return false;
+          
+          // Lọc theo loại tab
+          if (tabFilter && feedback.tabType !== tabFilter) return false;
+          
+          // Lọc theo đánh giá
+          if (ratingFilter && feedback.rating !== parseInt(ratingFilter)) return false;
+          
+          return true;
+        });
+        
+        // Cập nhật số lượng phản hồi
+        feedbackCount.textContent = `${filteredFeedbacks.length} phản hồi`;
+        
+        // Xóa dữ liệu cũ
+        tableBody.innerHTML = '';
+        
+        // Hiển thị trạng thái trống nếu không có dữ liệu
+        if (filteredFeedbacks.length === 0) {
+          tableBody.innerHTML = `
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <i class="fas fa-clipboard-list"></i>
+                  <p>Không có phản hồi nào</p>
+                </div>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+        
+        // Sắp xếp theo thời gian mới nhất
+        filteredFeedbacks.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        // Thêm dữ liệu vào bảng
+        filteredFeedbacks.forEach(feedback => {
+          const row = document.createElement('tr');
+          
+          // Chuẩn bị đánh giá sao
+          const stars = '★'.repeat(feedback.rating) + '☆'.repeat(5 - feedback.rating);
+          
+          // Định dạng thời gian
+          const date = new Date(feedback.timestamp);
+          const formattedDate = `${date.toLocaleDateString('vi-VN')} ${date.toLocaleTimeString('vi-VN')}`;
+          
+          // Ánh xạ tên tab
+          const tabNames = {
+            'explain': 'Giải thích',
+            'examples': 'Ví dụ',
+            'exercises': 'Bài tập',
+            'mistakes': 'Lỗi thường gặp'
+          };
+          
+          const tabName = tabNames[feedback.tabType] || feedback.tabType;
+          
+          row.innerHTML = `
+            <td>${feedback.topic}</td>
+            <td>${tabName}</td>
+            <td><span class="rating-stars">${stars}</span> (${feedback.rating})</td>
+            <td>${feedback.comment || '<em>Không có nội dung</em>'}</td>
+            <td>${formattedDate}</td>
+            <td>
+              <button class="action-btn delete" title="Xóa" data-id="${feedback.id}">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          `;
+          
+          tableBody.appendChild(row);
+        });
+        
+        // Thêm event listeners cho các nút xóa
+        document.querySelectorAll('.action-btn.delete').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            if (confirm('Bạn có chắc chắn muốn xóa phản hồi này?')) {
+              feedbackManager.deleteFeedback(id);
+              renderFeedbackData();
+            }
+          });
+        });
+      }
+      
+      // Hàm để khởi tạo các lựa chọn chủ đề
+      function initTopicOptions() {
+        const feedbacks = feedbackManager.getAllFeedbacks();
+        const topicFilter = document.getElementById('topic-filter');
+        
+        // Tìm các chủ đề duy nhất
+        const topics = [...new Set(feedbacks.map(feedback => feedback.topic))];
+        
+        // Xóa các lựa chọn cũ
+        while (topicFilter.options.length > 1) {
+          topicFilter.remove(1);
+        }
+        
+        // Thêm các lựa chọn mới
+        topics.forEach(topic => {
+          const option = document.createElement('option');
+          option.value = topic;
+          option.textContent = topic;
+          topicFilter.appendChild(option);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
