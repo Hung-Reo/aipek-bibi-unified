@@ -77,3 +77,8 @@ vector_store/
 
 # Node modules (if any)
 node_modules/
+
+# Ignore backup and temp files
+*.backup
+*.bak
+*.old
