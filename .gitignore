@@ -22,7 +22,7 @@ wheels/
 MANIFEST
 
 # Virtual Environment - CRITICAL!
-venv/
+*venv/
 env/
 ENV/
 env.bak/
