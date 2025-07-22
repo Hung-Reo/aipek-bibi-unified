@@ -250,7 +250,10 @@ async def chat_stream(request: Request):
                 else:  # Phiên bản cũ
                     # Thiết lập API key theo cách cũ
                     openai.api_key = api_key
-                    response = openai.ChatCompletion.create(
+                    # DEPRECATED: Old API no longer needed
+                    # Use new API syntax instead
+                    client = openai.OpenAI(api_key=api_key)
+                    response = client.chat.completions.create(
                         model=model,
                         messages=messages,
                         temperature=temperature,
