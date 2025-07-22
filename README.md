@@ -14,6 +14,7 @@
 - **🎵 Chuyển Văn bản thành Giọng nói**: Tạo âm thanh chuyên nghiệp sử dụng OpenAI TTS
 - **📤 Chức năng Xuất file**: Xuất Word/PDF với định dạng chuyên nghiệp
 - **🔍 Tích hợp RAG**: Tăng cường truy xuất nội dung từ 3 cơ sở tri thức
+    Nguồn theo Sách Giáo Khoa; Chương Trình Giảng Dạy và Mẫu Giáo Án (quá khứ)
 
 ## 🏗️ Kiến trúc
 
