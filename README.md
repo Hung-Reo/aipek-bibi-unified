@@ -1,78 +1,78 @@
-# 🎓 BiBi - AI Educational Assistant (Unified Version)
+# 🎓 BiBi - Trợ lý AI Giáo dục (Phiên bản Tích hợp)
 
-## 📋 Project Overview
+## 📋 Tổng quan Dự án
 
-**BiBi** is an AI-powered educational assistant specifically designed for K12 English teaching in Vietnam. This unified version combines both frontend and backend services into a single FastAPI application, reducing deployment costs and complexity.
+**BiBi** là trợ lý giáo dục được hỗ trợ bởi AI, được thiết kế đặc biệt cho việc giảng dạy tiếng Anh K12 tại Việt Nam. Phiên bản tích hợp này kết hợp cả dịch vụ frontend và backend thành một ứng dụng FastAPI duy nhất, giảm chi phí triển khai và độ phức tạp.
 
-### 🎯 Key Features
+### 🎯 Tính năng Chính
 
-- **📚 Lesson Plan Generation**: Automated creation of detailed English lesson plans for Grade 6
-- **📖 Supplementary Content**: Additional exercises and activities for skill reinforcement  
-- **📝 Review Lessons**: Comprehensive review materials covering multiple units
-- **🎭 Extracurricular Activities**: Creative activities beyond textbook content
-- **🧪 Test Generation**: Dynamic test creation with audio components
-- **🎵 Text-to-Speech**: Professional audio generation using OpenAI TTS
-- **📤 Export Functions**: Word/PDF export with professional formatting
-- **🔍 RAG Integration**: Enhanced content retrieval from 3 knowledge bases
+- **📚 Tạo Giáo án**: Tự động tạo giáo án tiếng Anh chi tiết cho lớp 6
+- **📖 Nội dung Bổ sung**: Bài tập và hoạt động bổ sung để củng cố kỹ năng
+- **📝 Bài Ôn tập**: Tài liệu ôn tập toàn diện bao gồm nhiều unit
+- **🎭 Hoạt động Ngoại khóa**: Hoạt động sáng tạo ngoài nội dung sách giáo khoa
+- **🧪 Tạo Đề kiểm tra**: Tạo đề kiểm tra động với thành phần âm thanh
+- **🎵 Chuyển Văn bản thành Giọng nói**: Tạo âm thanh chuyên nghiệp sử dụng OpenAI TTS
+- **📤 Chức năng Xuất file**: Xuất Word/PDF với định dạng chuyên nghiệp
+- **🔍 Tích hợp RAG**: Tăng cường truy xuất nội dung từ 3 cơ sở tri thức
 
-## 🏗️ Architecture
+## 🏗️ Kiến trúc
 
-### **Unified FastAPI Application**
-- **Backend**: Python FastAPI with RAG system
-- **Frontend**: Static HTML/CSS/JS served by FastAPI
-- **Database**: Pinecone vector database (3 namespaces)
-- **AI Services**: OpenAI GPT + TTS integration
-- **File Management**: Automated audio cleanup system
+### **Ứng dụng FastAPI Tích hợp**
+- **Backend**: Python FastAPI với hệ thống RAG
+- **Frontend**: HTML/CSS/JS tĩnh được phục vụ bởi FastAPI
+- **Cơ sở dữ liệu**: Cơ sở dữ liệu vector Pinecone (3 namespace)
+- **Dịch vụ AI**: Tích hợp OpenAI GPT + TTS
+- **Quản lý File**: Hệ thống dọn dẹp âm thanh tự động
 
-### **Project Structure**
+### **Cấu trúc Dự án**
 ```
 📁 BiBi_Unified/
-├── 📄 main.py                    # 🚀 Main FastAPI server
+├── 📄 main.py                    # 🚀 Máy chủ FastAPI chính
 ├── 📄 requirements.txt           # 📦 Dependencies
-├── 📄 Procfile                   # 🚀 Deployment config
-├── 📄 .env                       # 🔐 Environment variables
-├── 📁 app/                       # 🧠 Core application
-│   ├── 📁 core/                  # ⚙️ Core utilities
-│   ├── 📁 services/              # 🔧 Business services
-│   └── 📁 models/                # 📊 Data models
-├── 📁 routes/                    # 🛣️ API routes
-│   └── 📄 tts.py                 # 🎵 TTS endpoints
-├── 📁 static/                    # 🎨 Frontend assets
+├── 📄 Procfile                   # 🚀 Cấu hình triển khai
+├── 📄 .env                       # 🔐 Biến môi trường
+├── 📁 app/                       # 🧠 Ứng dụng cốt lõi
+│   ├── 📁 core/                  # ⚙️ Tiện ích cốt lõi
+│   ├── 📁 services/              # 🔧 Dịch vụ nghiệp vụ
+│   └── 📁 models/                # 📊 Mô hình dữ liệu
+├── 📁 routes/                    # 🛣️ Routes API
+│   └── 📄 tts.py                 # 🎵 Endpoints TTS
+├── 📁 static/                    # 🎨 Tài nguyên Frontend
 │   ├── 📁 css/                   # 🎨 Stylesheets
 │   ├── 📁 js/                    # 🧠 JavaScript
-│   └── 📁 images/                # 🖼️ Static images
-└── 📁 templates/                 # 📄 HTML templates
+│   └── 📁 images/                # 🖼️ Hình ảnh tĩnh
+└── 📁 templates/                 # 📄 Templates HTML
 ```
 
-## 🚀 Quick Start
+## 🚀 Bắt đầu Nhanh
 
-### **Prerequisites**
+### **Yêu cầu Trước**
 - Python 3.11+
 - OpenAI API Key
 - Pinecone API Key
 
-### **Local Development**
+### **Phát triển Cục bộ**
 ```bash
 # 1. Clone repository
 git clone https://github.com/Hung-Reo/aipek-bibi-unified.git
 cd aipek-bibi-unified
 
-# 2. Create virtual environment
+# 2. Tạo môi trường ảo
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Trên Windows: venv\Scripts\activate
 
-# 3. Install dependencies
+# 3. Cài đặt dependencies
 pip install -r requirements.txt
 
-# 4. Configure environment variables
+# 4. Cấu hình biến môi trường
 cp .env.example .env
-# Edit .env with your API keys
+# Chỉnh sửa .env với API keys của bạn
 
-# 5. Run development server
+# 5. Chạy máy chủ phát triển
 uvicorn main:app --reload --port 8000
 ```
 
-### **Environment Variables**
+### **Biến Môi trường**
 ```bash
 OPENAI_API_KEY=sk-proj-your-key-here
 PINECONE_API_KEY=pcsk_your-key-here
@@ -81,133 +81,133 @@ PINECONE_INDEX=bibi-chatbot-k12
 PORT=8000
 ```
 
-## 🌐 Production Deployment
+## 🌐 Triển khai Production
 
-### **Render.com Deployment**
+### **Triển khai Render.com**
 ```bash
-# Build Command
+# Lệnh Build
 pip install -r requirements.txt
 
-# Start Command  
+# Lệnh Start
 uvicorn main:app --host 0.0.0.0 --port $PORT
 ```
 
-### **Environment Setup**
-1. Add all environment variables in Render dashboard
-2. Enable auto-deploy from main branch
-3. Configure custom domain (optional)
+### **Thiết lập Môi trường**
+1. Thêm tất cả biến môi trường trong dashboard Render
+2. Bật auto-deploy từ nhánh main
+3. Cấu hình domain tùy chỉnh (tùy chọn)
 
 ## 🎯 API Endpoints
 
-### **Content Generation**
-- `POST /api/generate` - Generate lesson plans
-- `POST /api/generate_supplementary` - Generate supplementary content
-- `POST /api/generate_review` - Generate review lessons
-- `POST /api/generate_extracurricular` - Generate extracurricular activities
+### **Tạo Nội dung**
+- `POST /api/generate` - Tạo giáo án
+- `POST /api/generate_supplementary` - Tạo nội dung bổ sung
+- `POST /api/generate_review` - Tạo bài ôn tập
+- `POST /api/generate_extracurricular` - Tạo hoạt động ngoại khóa
 
-### **Test Generation**
-- `POST /api/generate_test` - Generate dynamic tests
-- `POST /api/tts/generate` - Generate audio files
-- `GET /api/tts/voices` - List available voices
+### **Tạo Đề kiểm tra**
+- `POST /api/generate_test` - Tạo đề kiểm tra động
+- `POST /api/tts/generate` - Tạo file âm thanh
+- `GET /api/tts/voices` - Liệt kê giọng có sẵn
 
-### **Utilities**
-- `GET /api/health` - Health check
-- `POST /api/rag/status` - RAG system status
-- `GET /api/export/{format}` - Export content
+### **Tiện ích**
+- `GET /api/health` - Kiểm tra tình trạng
+- `POST /api/rag/status` - Trạng thái hệ thống RAG
+- `GET /api/export/{format}` - Xuất nội dung
 
-## 🔧 Key Technologies
+## 🔧 Công nghệ Chính
 
-### **Backend Stack**
-- **FastAPI**: Modern Python web framework
-- **Langchain**: LLM application framework
-- **Pinecone**: Vector database for RAG
-- **OpenAI**: GPT-4.1 + TTS services
-- **Pydantic**: Data validation
+### **Stack Backend**
+- **FastAPI**: Framework web Python hiện đại
+- **Langchain**: Framework ứng dụng LLM
+- **Pinecone**: Cơ sở dữ liệu vector cho RAG
+- **OpenAI**: Dịch vụ GPT-4 + TTS
+- **Pydantic**: Xác thực dữ liệu
 
-### **Frontend Stack**
-- **Vanilla JavaScript**: ES6 modules
-- **Bootstrap**: UI framework
-- **Chart.js**: Data visualization
-- **Custom CSS**: Modern responsive design
+### **Stack Frontend**
+- **Vanilla JavaScript**: Modules ES6
+- **Bootstrap**: Framework UI
+- **Chart.js**: Trực quan hóa dữ liệu
+- **CSS Tùy chỉnh**: Thiết kế responsive hiện đại
 
-### **AI/ML Stack**
-- **RAG System**: 3 knowledge bases (SGK, Curriculum, Templates)
-- **Content Generation**: Curriculum-aligned prompts
-- **TTS System**: Professional audio generation
-- **Quality Control**: Automated content validation
+### **Stack AI/ML**
+- **Hệ thống RAG**: 3 cơ sở tri thức (SGK, Chương trình, Templates)
+- **Tạo Nội dung**: Prompts phù hợp chương trình
+- **Hệ thống TTS**: Tạo âm thanh chuyên nghiệp
+- **Kiểm soát Chất lượng**: Xác thực nội dung tự động
 
-## 📊 Performance Metrics
+## 📊 Chỉ số Hiệu suất
 
-### **Response Times**
-- **Content Generation**: 25-30s (optimized from 122s)
-- **RAG Success Rate**: 95%+ (up from 33%)
-- **Audio Generation**: 10-15s per dialogue
-- **Export Speed**: <5s for Word/PDF
+### **Thời gian Phản hồi**
+- **Tạo Nội dung**: 25-30s (tối ưu từ 122s)
+- **Tỷ lệ Thành công RAG**: 95%+ (tăng từ 33%)
+- **Tạo Âm thanh**: 10-15s mỗi đoạn hội thoại
+- **Tốc độ Xuất**: <5s cho Word/PDF
 
-## 🎓 Educational Value
+### **Tối ưu Chi phí**
+- **Trước đây**: $14/tháng (2 dịch vụ riêng biệt)
+- **Hiện tại**: $7/tháng (dịch vụ tích hợp)
+- **Tiết kiệm**: Giảm 50% chi phí
 
-### **For Teachers**
-- ⏰ **Time Saving**: 3+ hours → 30 minutes lesson prep
-- 📚 **Quality Content**: Professional, curriculum-aligned materials
-- 🎵 **Audio Materials**: Ready-to-use listening exercises
-- 📄 **Export Ready**: Word/PDF for immediate classroom use
+## 🎓 Giá trị Giáo dục
 
-### **For Students**
-- 🎯 **Grade-Appropriate**: Content tailored for Grade 6 level
-- 🎧 **Audio Learning**: Professional pronunciation examples
-- 📝 **Progressive Difficulty**: Scaffolded learning approach
-- 🎮 **Engaging Activities**: Interactive and creative exercises
+### **Dành cho Giáo viên**
+- ⏰ **Tiết kiệm Thời gian**: 2+ giờ → 30 phút chuẩn bị bài
+- 📚 **Nội dung Chất lượng**: Tài liệu chuyên nghiệp, phù hợp chương trình
+- 🎵 **Tài liệu Âm thanh**: Bài tập nghe sẵn sàng sử dụng
+- 📄 **Sẵn sàng Xuất**: Word/PDF để sử dụng ngay trong lớp
 
-## 🔒 Security & Privacy
+### **Dành cho Học sinh**
+- 🎯 **Phù hợp Lứa tuổi**: Nội dung được điều chỉnh cho lớp 6
+- 🎧 **Học Âm thanh**: Ví dụ phát âm chuyên nghiệp
+- 📝 **Độ khó Tăng dần**: Phương pháp học có bậc
+- 🎮 **Hoạt động Hấp dẫn**: Bài tập tương tác và sáng tạo
 
-- **API Key Protection**: Environment variable configuration
-- **Data Privacy**: No student data storage
-- **Secure Deployment**: HTTPS enforcement
-- **Rate Limiting**: API abuse prevention
+## 🔒 Bảo mật & Quyền riêng tư
 
-## 📈 Monitoring & Analytics
+- **Bảo vệ API Key**: Cấu hình biến môi trường
+- **Quyền riêng tư Dữ liệu**: Không lưu trữ dữ liệu học sinh
+- **Triển khai An toàn**: Bắt buộc HTTPS
+- **Giới hạn Tỷ lệ**: Ngăn chặn lạm dụng API
 
-### **Health Monitoring**
-- Real-time RAG system status
-- API response time tracking
-- Error rate monitoring
-- Resource usage analytics
+## 📈 Giám sát & Phân tích
 
-### **Quality Metrics**
-- Content length validation (15,000+ characters)
-- Curriculum alignment scoring
-- User feedback integration
-- Performance benchmarking
+### **Giám sát Tình trạng**
+- Trạng thái hệ thống RAG theo thời gian thực
+- Theo dõi thời gian phản hồi API
+- Giám sát tỷ lệ lỗi
+- Phân tích sử dụng tài nguyên
 
-## 🛠️ Development Guidelines
+### **Chỉ số Chất lượng**
+- Xác thực độ dài nội dung (15,000+ ký tự)
+- Chấm điểm phù hợp chương trình
+- Tích hợp phản hồi người dùng
+- Đo lường hiệu suất
 
-### **Contributing**
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+## 🛠️ Hướng dẫn Phát triển
 
-## 📞 Support & Contact
+### **Tiêu chuẩn Chất lượng Code**
+- **Giới hạn Kích thước File**: <500 dòng mỗi file
+- **Kiến trúc Modular**: Tách biệt rõ ràng
+- **Kiểm thử Toàn diện**: Unit + integration tests
+- **Tài liệu**: Comments inline + docs bên ngoài
 
-### **Educational Inquiry**
-- **Training**: Teacher training programs available
-- **Implementation**: School-wide deployment support
-- **Customization**: Subject-specific adaptations
+## 📞 Hỗ trợ & Liên hệ
 
-## 📄 License
+### **Tư vấn Giáo dục**
+- **Đào tạo**: Chương trình đào tạo giáo viên có sẵn
+- **Triển khai**: Hỗ trợ triển khai toàn trường
+- **Tùy chỉnh**: Điều chỉnh theo môn học cụ thể
 
-This is public PJT and tried to work with LLM Claude to generated codes as Viber coding, and this is working. This can be used for everyone interesting in specially for Vietnam Teacher focus with RAG based from VN education purposes only.
+## 🙏 Lời cảm ơn
 
-## 🙏 Acknowledgments
-
-- **Ministry of Education Vietnam**: Curriculum standards and guidelines
-- **OpenAI**: GPT-4.1 and TTS services
-- **Pinecone**: Vector database infrastructure
-- **Educational Partners**: Teachers and schools providing feedback
+- **Bộ Giáo dục Việt Nam**: Tiêu chuẩn và hướng dẫn chương trình
+- **OpenAI**: Dịch vụ GPT-4 và TTS
+- **Pinecone**: Cơ sở hạ tầng cơ sở dữ liệu vector
+- **Đối tác Giáo dục**: Giáo viên và trường học cung cấp phản hồi
 
 ---
 
-**🎯 Ready for Production | 📚 Educational Excellence | 🚀 AI-Powered Innovation**
+**🎯 Sẵn sàng cho Production | 📚 Xuất sắc Giáo dục | 🚀 Đổi mới được Hỗ trợ AI**
 
-*Built with ❤️ for Vietnamese K12 Education*
+*Được xây dựng với ❤️ cho Giáo dục K12 Việt Nam*
