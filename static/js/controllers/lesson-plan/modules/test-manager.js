@@ -22,45 +22,13 @@ export class TestManager {
   }
 
   /**
-   * ✅ NEW: Initialize TTS controls when test tab is activated
+   * ✅ SIMPLIFIED: Initialize test tab
    */
   initTestTab() {
-    console.log('🧪 Initializing test tab with TTS controls...');
-    
-    // Add TTS controls to sidebar
-    this.addTTSControls();
-    
-    // Setup event listeners if needed
-    this.setupTTSEventListeners();
+    console.log('🧪 Test tab initialized');
   }
 
-  /**
-   * ✅ NEW: Setup TTS event listeners
-   */
-  setupTTSEventListeners() {
-    // Listen for voice/speed changes
-    const voiceSelect = document.getElementById('tts-voice');
-    const speedSelect = document.getElementById('tts-speed');
-    const audioCheckbox = document.getElementById('generate-audio');
-    
-    if (voiceSelect) {
-      voiceSelect.addEventListener('change', () => {
-        console.log('🎙️ Voice changed to:', voiceSelect.value);
-      });
-    }
-    
-    if (speedSelect) {
-      speedSelect.addEventListener('change', () => {
-        console.log('⏱️ Speed changed to:', speedSelect.value);
-      });
-    }
-    
-    if (audioCheckbox) {
-      audioCheckbox.addEventListener('change', () => {
-        console.log('🔊 Audio generation:', audioCheckbox.checked ? 'enabled' : 'disabled');
-      });
-    }
-  }
+  // ✅ REMOVED: TTS event listeners - using UI.displayAudioPlayers() instead
 
   /**
    * ✅ NEW: Setup test tab initialization
@@ -242,8 +210,8 @@ export class TestManager {
             const audioResults = await this.generateAudioFiles(fullContent);
             
             if (audioResults.success) {
-              // ✅ NEW: Use new TTS UI instead of old displayAudioPlayers
-              this.displayAudioFiles(audioResults.audioFiles);
+              // ✅ FIXED: Use working displayAudioPlayers from UI
+              this.ui.displayAudioPlayers(streamingElement, audioResults);
               console.log('✅ Audio generation complete');
             } else {
               console.warn('⚠️ Audio generation failed, continuing with text-only');
@@ -480,292 +448,13 @@ export class TestManager {
     return audioCheckbox && audioCheckbox.checked;
   }
 
-  /**
-   * ✅ NEW: Add TTS controls to test sidebar
-   */
-  addTTSControls() {
-    const sidebar = document.querySelector('.lesson-plan-sidebar');
-    if (!sidebar) return;
+  // ✅ REMOVED: addTTSControls() - using UI.displayAudioPlayers() instead
 
-    // Check if already added
-    if (document.getElementById('tts-controls')) return;
+  // ✅ REMOVED: addTTSStyles() - using UI.displayAudioPlayers() instead
 
-    const ttsHTML = `
-      <div id="tts-controls" class="tts-controls-section">
-        <h4>🎵 Audio Generation</h4>
-        
-        <div class="form-group">
-          <label class="checkbox-label">
-            <input type="checkbox" id="generate-audio" checked>
-            <span class="checkmark"></span>
-            Tạo file audio cho bài nghe
-          </label>
-        </div>
-        
-        <div class="form-group">
-          <label for="tts-voice">Giọng đọc:</label>
-          <select id="tts-voice" class="full-width">
-            <option value="alloy">Alloy (Cân bằng)</option>
-            <option value="echo" selected>Echo (Rõ ràng)</option>
-            <option value="nova">Nova (Ấm áp)</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label for="tts-speed">Tốc độ:</label>
-          <select id="tts-speed" class="full-width">
-            <option value="0.9">Chậm (0.9x)</option>
-            <option value="1.0" selected>Bình thường (1.0x)</option>
-            <option value="1.1">Nhanh (1.1x)</option>
-          </select>
-        </div>
-        
-        <div id="audio-files-section" class="audio-files-section" style="display: none;">
-          <h4>📁 Audio Files</h4>
-          <div id="audio-files-list" class="audio-files-list">
-            <!-- Audio files will be populated here -->
-          </div>
-          <button id="download-all-audio" class="action-btn secondary-btn" style="display: none;">
-            <i class="fas fa-download"></i> Tải tất cả audio
-          </button>
-        </div>
-      </div>
-    `;
+  // ✅ REMOVED: displayAudioFiles() - using UI.displayAudioPlayers() instead
 
-    // Add TTS controls to sidebar
-    sidebar.insertAdjacentHTML('beforeend', ttsHTML);
-    
-    // Add CSS styles
-    this.addTTSStyles();
-    
-    console.log('✅ TTS controls added to test sidebar');
-  }
-
-  /**
-   * ✅ NEW: Add TTS CSS styles
-   */
-  addTTSStyles() {
-    const styleId = 'tts-styles';
-    if (document.getElementById(styleId)) return;
-
-    const css = `
-      .tts-controls-section {
-        margin-top: 20px;
-        padding: 15px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        background: #f9f9f9;
-      }
-      
-      .tts-controls-section h4 {
-        margin-top: 0;
-        color: #333;
-        font-size: 14px;
-      }
-      
-      .checkbox-label {
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        font-size: 14px;
-      }
-      
-      .checkbox-label input[type="checkbox"] {
-        margin-right: 8px;
-      }
-      
-      .audio-files-section {
-        margin-top: 15px;
-        padding: 10px;
-        border-top: 1px solid #eee;
-      }
-      
-      .audio-file-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 8px;
-        margin: 5px 0;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 12px;
-      }
-      
-      .audio-file-info {
-        flex: 1;
-      }
-      
-      .audio-file-title {
-        font-weight: bold;
-        color: #333;
-      }
-      
-      .audio-file-meta {
-        color: #666;
-        font-size: 11px;
-      }
-      
-      .audio-file-controls {
-        display: flex;
-        gap: 5px;
-      }
-      
-      .audio-btn {
-        background: #007bff;
-        color: white;
-        border: none;
-        padding: 4px 8px;
-        border-radius: 3px;
-        cursor: pointer;
-        font-size: 11px;
-      }
-      
-      .audio-btn:hover {
-        background: #0056b3;
-      }
-      
-      .audio-btn.download {
-        background: #28a745;
-      }
-      
-      .audio-btn.download:hover {
-        background: #1e7e34;
-      }
-    `;
-
-    const style = document.createElement('style');
-    style.id = styleId;
-    style.textContent = css;
-    document.head.appendChild(style);
-  }
-
-  /**
-   * ✅ NEW: Display audio files with play/download controls
-   */
-  displayAudioFiles(audioFiles) {
-    const audioSection = document.getElementById('audio-files-section');
-    const audioList = document.getElementById('audio-files-list');
-    const downloadAllBtn = document.getElementById('download-all-audio');
-    
-    if (!audioSection || !audioList) return;
-    
-    // Show audio section
-    audioSection.style.display = 'block';
-    
-    // Clear previous files
-    audioList.innerHTML = '';
-    
-    // Add each audio file
-    audioFiles.forEach(file => {
-      const fileElement = document.createElement('div');
-      fileElement.className = 'audio-file-item';
-      fileElement.innerHTML = `
-        <div class="audio-file-info">
-          <div class="audio-file-title">${file.title}</div>
-          <div class="audio-file-meta">
-            Type: ${file.type} | Size: ${this.formatFileSize(file.size_bytes)} | ~${file.duration_estimate}s
-          </div>
-        </div>
-        <div class="audio-file-controls">
-          <button class="audio-btn play" data-url="${file.url}">
-            <i class="fas fa-play"></i> Play
-          </button>
-          <button class="audio-btn download" data-url="${file.url}" data-filename="${file.filename}">
-            <i class="fas fa-download"></i> Download
-          </button>
-        </div>
-      `;
-      
-      // ✅ Add event listeners properly
-      const playBtn = fileElement.querySelector('.play');
-      const downloadBtn = fileElement.querySelector('.download');
-      
-      if (playBtn) {
-        playBtn.addEventListener('click', () => this.playAudio(file.url));
-      }
-      
-      if (downloadBtn) {
-        downloadBtn.addEventListener('click', () => this.downloadAudio(file.url, file.filename));
-      }
-      
-      audioList.appendChild(fileElement);
-    });
-    
-    // Show download all button
-    if (downloadAllBtn && audioFiles.length > 1) {
-      downloadAllBtn.style.display = 'block';
-      downloadAllBtn.onclick = () => this.downloadAllAudio(audioFiles);
-    }
-    
-    console.log(`✅ Displayed ${audioFiles.length} audio files`);
-  }
-
-  /**
-   * ✅ NEW: Format file size for display
-   */
-  formatFileSize(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  }
-
-  /**
-   * ✅ NEW: Play audio file
-   */
-  playAudio(url) {
-    try {
-      // Create audio element if needed
-      let audio = document.getElementById('test-audio-player');
-      if (!audio) {
-        audio = document.createElement('audio');
-        audio.id = 'test-audio-player';
-        audio.controls = true;
-        audio.style.width = '100%';
-        document.body.appendChild(audio);
-      }
-      
-      audio.src = url;
-      audio.play();
-      console.log('▶️ Playing audio:', url);
-    } catch (error) {
-      console.error('❌ Error playing audio:', error);
-      // Fallback: open in new tab
-      window.open(url, '_blank');
-    }
-  }
-
-  /**
-   * ✅ NEW: Download audio file
-   */
-  downloadAudio(url, filename) {
-    try {
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      console.log('⬇️ Downloading:', filename);
-    } catch (error) {
-      console.error('❌ Error downloading audio:', error);
-      // Fallback: open in new tab
-      window.open(url, '_blank');
-    }
-  }
-
-  /**
-   * ✅ NEW: Download all audio files
-   */
-  downloadAllAudio(audioFiles) {
-    audioFiles.forEach((file, index) => {
-      setTimeout(() => {
-        this.downloadAudio(file.url, file.filename);
-      }, index * 500); // Delay to avoid browser blocking
-    });
-    console.log(`⬇️ Downloading ${audioFiles.length} audio files`);
-  }
+  // ✅ REMOVED: All helper audio functions - using UI.displayAudioPlayers() instead
 
   /**
    * ✅ UPDATED: Gọi TTS API để tạo audio files với dynamic listening split
