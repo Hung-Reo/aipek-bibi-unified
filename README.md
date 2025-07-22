@@ -52,6 +52,8 @@
 - Pinecone API Key
 
 ### **Phát triển Cục bộ**
+Được phát triễn cùng với Claude của Anthoropic như Viber code, thời gian phát triễn 2 thàng từ May-July 2025. Từ model 3.7 và 4.0 Sonnet.
+
 ```bash
 # 1. Clone repository
 git clone https://github.com/Hung-Reo/aipek-bibi-unified.git
