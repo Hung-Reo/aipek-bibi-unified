@@ -769,8 +769,8 @@ class RetrieverService:
                 doc._score = doc._score * weight
             weighted_docs.append(doc)
 
-        # Sắp xếp lại theo score
-        if hasattr(weighted_docs[0], '_score'):
+        # Sắp xếp lại theo score (check empty list first)
+        if weighted_docs and hasattr(weighted_docs[0], '_score'):
             weighted_docs.sort(key=lambda x: x._score, reverse=True)
 
         return weighted_docs

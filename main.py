@@ -282,10 +282,17 @@ async def chat_stream(
                     logger.info("✅ Bắt đầu streaming từ OpenAI (phiên bản mới)...")
 
                     # Xử lý stream phiên bản mới
+                    chunk_count = 0
                     for chunk in response:
-                        if hasattr(chunk.choices[0].delta, 'content') and chunk.choices[0].delta.content:
-                            content = chunk.choices[0].delta.content
-                            yield f"data: {json.dumps({'choices': [{'delta': {'content': content}}]})}\n\n"
+                        chunk_count += 1
+                        if chunk.choices and len(chunk.choices) > 0:
+                            delta = chunk.choices[0].delta
+                            if hasattr(delta, 'content') and delta.content is not None:
+                                content = delta.content
+                                logger.debug(f"📤 Chunk {chunk_count}: {len(content)} chars")
+                                yield f"data: {json.dumps({'choices': [{'delta': {'content': content}}]})}\n\n"
+
+                    logger.info(f"✅ Đã gửi {chunk_count} chunks tổng cộng")
                 else:  # Phiên bản cũ
                     # Thiết lập API key theo cách cũ
                     openai.api_key = api_key
