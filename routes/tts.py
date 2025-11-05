@@ -1,8 +1,13 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request, Depends
 from app.services.tts_service import TTSService
+from app.middleware.rate_limit import limiter
+from app.middleware.auth import verify_api_key
 from pydantic import BaseModel
 from typing import Dict, List, Optional
 import time
+import logging
+
+logger = logging.getLogger(__name__)
 
 class TTSRequest(BaseModel):
     testContent: str
@@ -15,8 +20,16 @@ router = APIRouter()
 tts_service = TTSService()
 
 @router.post("/generate")
-async def generate_tts(request: TTSRequest):
-    """Port từ router.post('/generate') trong tts.js"""
+@limiter.limit("10/minute")  # ✅ TTS: 10 per minute (very expensive - OpenAI TTS API)
+async def generate_tts(
+    http_request: Request,
+    request: TTSRequest,
+    api_key: str = Depends(verify_api_key)  # ✅ Require authentication
+):
+    """Port từ router.post('/generate') trong tts.js
+    Rate limited to 10 requests per minute due to expensive TTS operations
+    Requires authentication via X-API-Key header
+    """
     try:
         # Extract listening scripts với dynamic split
         scripts = tts_service.extract_listening_scripts(
@@ -76,5 +89,5 @@ async def generate_tts(request: TTSRequest):
         }
         
     except Exception as error:
-        print(f'❌ TTS generation error: {error}')
+        logger.error(f'❌ TTS generation error: {error}', exc_info=True)
         raise HTTPException(status_code=500, detail=str(error))

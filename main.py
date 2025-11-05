@@ -6,7 +6,8 @@ import os
 import json
 import traceback
 import uvicorn
-from fastapi import FastAPI, Query, HTTPException, Request
+import logging
+from fastapi import FastAPI, Query, HTTPException, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -17,6 +18,10 @@ import openai
 from pydantic import BaseModel, Field
 from routes.tts import router as tts_router
 
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Thêm thư mục gốc vào sys.path để import được các module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 
@@ -24,14 +29,34 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 BIBI_NAMESPACE = "bibi_grammar"
 AVAILABLE_NAMESPACES = ["bibi_grammar", "bibi_sgk", "bibi_ctgd", "bibi_others"]
 
-# Import retriever_service từ đường dẫn chính xác
+# Import retriever_service và error handler từ đường dẫn chính xác
 try:
     from app.core.retriever import retriever_service
-    from app.config import BIBI_PINECONE_INDEX
+    from app.config import BIBI_PINECONE_INDEX, IS_PRODUCTION, ENVIRONMENT, ALLOWED_ORIGINS
+    from app.utils.error_handler import (
+        create_error_response,
+        sanitize_error_message,
+        handle_openai_error,
+        handle_pinecone_error
+    )
+    from app.middleware.rate_limit import limiter, rate_limit_exceeded_handler
+    from app.middleware.auth import verify_api_key, verify_api_key_optional
+    from slowapi.errors import RateLimitExceeded
 
-    print(f"✅ Đã kết nối thành công với dịch vụ RAG - Pinecone index: {BIBI_PINECONE_INDEX}")
+    logger.info(f"✅ Đã kết nối thành công với dịch vụ RAG - Pinecone index: {BIBI_PINECONE_INDEX}")
+    logger.info(f"🔒 Environment: {ENVIRONMENT} (Production: {IS_PRODUCTION})")
+    logger.info(f"🔒 CORS enabled for origins: {ALLOWED_ORIGINS}")
+
+    # Log authentication status
+    from app.config import API_SECRET_KEY
+    if API_SECRET_KEY:
+        logger.info(f"🔒 API Authentication: ENABLED (key: {API_SECRET_KEY[:10]}...)")
+    else:
+        logger.warning(f"⚠️ API Authentication: DISABLED (development mode)")
+        logger.warning(f"⚠️ Run 'python scripts/generate_api_key.py' to generate a key")
+
 except ImportError as e:
-    print(f"❌ Lỗi import retriever_service: {str(e)}")
+    logger.error(f"❌ Lỗi import: {str(e)}")
     raise
 
 # Model cho request từ frontend
@@ -45,10 +70,10 @@ class ChatRequest(BaseModel):
 # Kiểm tra phiên bản OpenAI
 try:
     OPENAI_VERSION = int(openai.__version__.split('.')[0])
-    print(f"📌 Đã phát hiện OpenAI API phiên bản: {openai.__version__} (Chính: {OPENAI_VERSION})")
+    logger.info(f"📌 Đã phát hiện OpenAI API phiên bản: {openai.__version__} (Chính: {OPENAI_VERSION})")
 except (ImportError, AttributeError, ValueError):
     OPENAI_VERSION = 0
-    print("⚠️ Không thể xác định phiên bản OpenAI API, giả định phiên bản cũ")
+    logger.warning("⚠️ Không thể xác định phiên bản OpenAI API, giả định phiên bản cũ")
 
 # ✅ UNIFIED: Tạo FastAPI app với static serving
 app = FastAPI(
@@ -63,16 +88,21 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # ✅ UNIFIED: Setup templates directory
 templates = Jinja2Templates(directory="templates")
 
-# Cấu hình CORS
+# ✅ SECURE CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,  # ✅ Whitelist specific domains (no more "*")
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["*"],
+    allow_headers=["Content-Type", "Authorization", "X-API-Key"],  # ✅ Specific headers only
     expose_headers=["Content-Length"],
     max_age=600,
 )
+
+# ✅ SECURITY: Initialize rate limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+logger.info(f"🔒 Rate limiting enabled: {'100/hour' if IS_PRODUCTION else '1000/hour'} (global)")
 
 # Mount TTS routes
 app.include_router(tts_router, prefix="/api/tts", tags=["tts"])
@@ -111,7 +141,8 @@ async def serve_feedback_admin(request: Request):
 # ===============================
 
 @app.get("/api/health")
-async def health_check():
+@limiter.limit("60/minute")  # ✅ Health checks: 60 per minute
+async def health_check(request: Request):
     """Kiểm tra trạng thái API và kết nối Pinecone"""
     try:
         # Kiểm tra kết nối đến Pinecone nhưng không trả về object phức tạp
@@ -142,30 +173,33 @@ async def health_check():
         }
 
 @app.get("/api/rag")
+@limiter.limit("30/minute")  # ✅ RAG searches: 30 per minute (expensive operations)
 async def search_documents(
+    request: Request,  # ✅ Required for rate limiting
     query: str = Query(..., description="Search query"),
     namespace: str = Query(BIBI_NAMESPACE, description="Namespace to search in"),
     top_k: int = Query(5, description="Number of results to return"),
-    search_all: bool = Query(False, description="Search all namespaces")
+    search_all: bool = Query(False, description="Search all namespaces"),
+    api_key: str = Depends(verify_api_key)  # ✅ Require authentication
 ):
-    """Tìm kiếm tài liệu với truy vấn"""
+    """Tìm kiếm tài liệu với truy vấn (requires authentication)"""
     try:
-        print(f"🔍 API Search: query='{query}', namespace={namespace}, top_k={top_k}")
-        
+        logger.info(f"🔍 API Search: query='{query}', namespace={namespace}, top_k={top_k}")
+
         if search_all:
-            print(f"🔄 Tìm kiếm trên tất cả namespace: {AVAILABLE_NAMESPACES}")
+            logger.info(f"🔄 Tìm kiếm trên tất cả namespace: {AVAILABLE_NAMESPACES}")
             docs = retriever_service.search_multiple_namespaces(
                 query,
                 namespaces=AVAILABLE_NAMESPACES,
                 top_k=top_k
             )
         else:
-            print(f"🔄 Tìm kiếm trong namespace: {namespace}")
+            logger.info(f"🔄 Tìm kiếm trong namespace: {namespace}")
             docs = retriever_service.search(query, top_k=top_k, namespace=namespace)
 
         # Nếu không có kết quả, thử tìm trong tất cả các namespace
         if not docs and not search_all:
-            print(f"⚠️ Không tìm thấy kết quả trong namespace {namespace}. Thử tìm trong tất cả namespace.")
+            logger.warning(f"⚠️ Không tìm thấy kết quả trong namespace {namespace}. Thử tìm trong tất cả namespace.")
             docs = retriever_service.search_multiple_namespaces(
                 query,
                 namespaces=AVAILABLE_NAMESPACES,
@@ -180,7 +214,7 @@ async def search_documents(
                 "metadata": doc.metadata
             })
 
-        print(f"✅ Tìm thấy {len(results)} kết quả cho '{query}'")
+        logger.info(f"✅ Tìm thấy {len(results)} kết quả cho '{query}'")
 
         return JSONResponse(
             content={
@@ -194,20 +228,25 @@ async def search_documents(
 
     except Exception as e:
         error_trace = traceback.format_exc()
-        print(f"❌ Lỗi: {str(e)}")
-        print(error_trace)
+        logger.error(f"❌ RAG search error: {str(e)}")
+        logger.error(error_trace)
 
-        return {
-            "status": "error",
-            "message": str(e),
-            "traceback": error_trace
-        }
+        # ✅ Return sanitized error (no API keys, no sensitive info)
+        return JSONResponse(
+            status_code=500,
+            content=handle_pinecone_error(e) if "pinecone" in str(e).lower() else create_error_response(e, include_details=not IS_PRODUCTION)
+        )
 
 @app.post("/api/chat")
-async def chat_stream(request: Request):
+@limiter.limit("20/minute")  # ✅ Chat: 20 per minute (very expensive - OpenAI API)
+async def chat_stream(
+    request: Request,
+    api_key: str = Depends(verify_api_key)  # ✅ Require authentication
+):
     """
-    API endpoint xử lý streaming response từ OpenAI
+    API endpoint xử lý streaming response từ OpenAI (requires authentication)
     Hỗ trợ cả hai phiên bản API (cũ và mới)
+    Rate limited to 20 requests per minute
     """
     try:
         # Đọc dữ liệu từ request
@@ -217,17 +256,17 @@ async def chat_stream(request: Request):
         temperature = body.get("temperature", 0.7)
         max_tokens = body.get("max_tokens", 2000)
 
-        print(f"📨 Nhận yêu cầu API chat với: model={model}, messages={len(messages)}")
+        logger.info(f"📨 Nhận yêu cầu API chat với: model={model}, messages={len(messages)}")
 
         # Đảm bảo API key được thiết lập
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
-            print("⚠️ OPENAI_API_KEY không được thiết lập trong biến môi trường")
+            logger.warning("⚠️ OPENAI_API_KEY không được thiết lập trong biến môi trường")
             raise ValueError("API key không được cấu hình")
 
         def stream_generator():
             try:
-                print(f"🔄 Sử dụng OpenAI API phiên bản: {'mới (v1)' if OPENAI_VERSION >= 1 else 'cũ'}")
+                logger.info(f"🔄 Sử dụng OpenAI API phiên bản: {'mới (v1)' if OPENAI_VERSION >= 1 else 'cũ'}")
 
                 if OPENAI_VERSION >= 1:  # Phiên bản mới (v1)
                     # Khởi tạo client theo cách mới
@@ -240,7 +279,7 @@ async def chat_stream(request: Request):
                         stream=True
                     )
 
-                    print("✅ Bắt đầu streaming từ OpenAI (phiên bản mới)...")
+                    logger.info("✅ Bắt đầu streaming từ OpenAI (phiên bản mới)...")
 
                     # Xử lý stream phiên bản mới
                     for chunk in response:
@@ -261,7 +300,7 @@ async def chat_stream(request: Request):
                         stream=True
                     )
 
-                    print("✅ Bắt đầu streaming từ OpenAI (phiên bản cũ)...")
+                    logger.info("✅ Bắt đầu streaming từ OpenAI (phiên bản cũ)...")
 
                     # Xử lý stream phiên bản cũ
                     for chunk in response:
@@ -273,11 +312,25 @@ async def chat_stream(request: Request):
 
                 # Kết thúc stream
                 yield "data: [DONE]\n\n"
-                print("✅ Streaming hoàn tất")
+                logger.info("✅ Streaming hoàn tất")
 
             except Exception as e:
-                print(f"❌ Lỗi streaming từ OpenAI: {str(e)}")
-                error_json = json.dumps({"error": {"message": str(e)}})
+                logger.error(f"❌ Lỗi streaming từ OpenAI: {str(e)}", exc_info=True)
+
+                # ✅ Sanitize error message before sending to client
+                safe_message = sanitize_error_message(str(e))
+
+                # Determine error type for better user message
+                if "rate" in str(e).lower():
+                    safe_message = "Rate limit exceeded. Please try again in a moment."
+                elif "authentication" in str(e).lower():
+                    safe_message = "Service authentication error. Please contact support."
+                elif "timeout" in str(e).lower():
+                    safe_message = "Request timeout. Please try again."
+                else:
+                    safe_message = "AI service error. Please try again."
+
+                error_json = json.dumps({"error": {"message": safe_message}})
                 yield f"data: {error_json}\n\n"
                 yield "data: [DONE]\n\n"
 
@@ -293,18 +346,17 @@ async def chat_stream(request: Request):
         )
 
     except Exception as e:
-        print(f"❌ Lỗi xử lý request: {str(e)}")
+        logger.error(f"❌ Lỗi xử lý chat request: {str(e)}", exc_info=True)
+
+        # ✅ Return sanitized error response
         return JSONResponse(
             status_code=500,
-            content={
-                "status": "error",
-                "message": str(e)
-            }
+            content=handle_openai_error(e) if "openai" in str(e).lower() else create_error_response(e)
         )
 
 # Chỉ chạy khi gọi trực tiếp file này
 if __name__ == "__main__":
     # ✅ UNIFIED: Chạy trên port từ environment hoặc default 8000
     port = int(os.environ.get("PORT", 8000))
-    print(f"🚀 Khởi động BiBi Unified server trên cổng {port}...")
+    logger.info(f"🚀 Khởi động BiBi Unified server trên cổng {port}...")
     uvicorn.run(app, host="0.0.0.0", port=port)

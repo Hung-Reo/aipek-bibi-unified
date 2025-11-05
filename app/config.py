@@ -56,6 +56,24 @@ INDEX_DIRECTORY = VECTOR_STORE_PATH
 # Mật khẩu admin
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "bibi2025")
 
+# Environment Configuration (for error handling & security)
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+IS_PRODUCTION = ENVIRONMENT == "production"
+
+# CORS Configuration
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000").split(",")
+# Clean up whitespace
+ALLOWED_ORIGINS = [origin.strip() for origin in ALLOWED_ORIGINS]
+
+# API Authentication
+API_SECRET_KEY = os.getenv("API_SECRET_KEY", "")
+# Validate API key is set in production
+if not API_SECRET_KEY and IS_PRODUCTION:
+    raise ValueError(
+        "❌ API_SECRET_KEY must be set in production! "
+        "Run: python scripts/generate_api_key.py to generate a key"
+    )
+
 # Đảm bảo các thư mục cần thiết tồn tại
 os.makedirs(VECTOR_STORE_PATH, exist_ok=True)
 os.makedirs(DOCUMENT_STORE_PATH, exist_ok=True)
