@@ -257,7 +257,7 @@ class RetrieverService:
                 query_results = pinecone_index.query(**query_params)
 
                 # Chuyển đổi kết quả thành Document
-                from langchain.schema import Document
+                from langchain_core.documents import Document
                 results = []
                 for match in query_results.get('matches', []):
                     metadata = match.get('metadata', {})

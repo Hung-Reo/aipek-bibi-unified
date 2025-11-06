@@ -6,7 +6,7 @@ import os
 import threading
 from typing import List, Dict, Any, Callable, Optional
 from openai import OpenAI  # Cách import mới cho OpenAI v1
-from langchain.schema import Document
+from langchain_core.documents import Document
 from app.core.prompt_manager import prompt_manager  # Import prompt manager
 from app.config import SCHOOL_NAME  # Import tên trường từ config
 
